@@ -31,17 +31,17 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 以下链接对应项目 `release` 目录内的构建产物。直接打开源码仓库而未执行构建时，二进制文件可能尚未生成。
 
-- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0.1-macos-universal.dmg](../release/MDWork-1.0.0.1-macos-universal.dmg)
-- macOS Apple Silicon（arm64）：[MDWork-1.0.0.1-macos-arm64.dmg](../release/MDWork-1.0.0.1-macos-arm64.dmg)
-- Windows x64 便携版：[MDWork-1.0.0.1-win.zip](../release/MDWork-1.0.0.1-win.zip)
-- VS Code：[MDWork-vscode-1.0.0.1.vsix](../release/MDWork-vscode-1.0.0.1.vsix)
+- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0.2-macos-universal.dmg](../release/MDWork-1.0.0.2-macos-universal.dmg)
+- macOS Apple Silicon（arm64）：[MDWork-1.0.0.2-macos-arm64.dmg](../release/MDWork-1.0.0.2-macos-arm64.dmg)
+- Windows x64 便携版：[MDWork-1.0.0.2-win.zip](../release/MDWork-1.0.0.2-win.zip)
+- VS Code：[MDWork-vscode-1.0.0.2.vsix](../release/MDWork-vscode-1.0.0.2.vsix)
 - 校验值：[SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS 安装
 
 通用 DMG 同时包含 arm64 和 x86_64 架构，适用于 Apple Silicon（M 系列芯片）和 Intel Mac。另有仅含 arm64 的独立包；不确定芯片类型时选择通用版即可。
 
-1. 下载并双击 `MDWork-1.0.0.1-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0.1-macos-arm64.dmg`。
+1. 下载并双击 `MDWork-1.0.0.2-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0.2-macos-arm64.dmg`。
 2. 在打开的窗口中将 **MDWork.app** 拖入 **Applications（应用程序）**。
 3. 推出 DMG 磁盘映像。
 4. 从“应用程序”或 Launchpad 启动 MDWork。
@@ -52,7 +52,7 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 当前交付物是 Windows x64 **便携版 ZIP**，不是 Setup EXE 安装程序，也不需要安装到系统目录。
 
-1. 下载 `MDWork-1.0.0.1-win.zip`，并核对 SHA-256 校验值。
+1. 下载 `MDWork-1.0.0.2-win.zip`，并核对 SHA-256 校验值。
 2. 在文件资源管理器中右键 ZIP，选择“全部解压缩”，解压到自己有读写权限的目录；不要直接在压缩包预览中运行。
 3. 打开解压后的文件夹，双击 **MDWork.exe** 启动。
 4. 便携版不会自动创建开始菜单项或卸载程序。可为 `MDWork.exe` 自行创建快捷方式；退出应用后删除整个解压文件夹即可移除。
@@ -66,14 +66,14 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 1. 打开 VS Code 的“扩展”视图。
 2. 点击扩展视图右上角的 `…`。
 3. 选择 **Install from VSIX… / 从 VSIX 安装…**。
-4. 选择 `MDWork-vscode-1.0.0.1.vsix` 并按提示重新加载。
+4. 选择 `MDWork-vscode-1.0.0.2.vsix` 并按提示重新加载。
 5. 打开一个 Markdown 文件。
 6. 按 `Cmd/Ctrl + Shift + P`，执行 **MDWork: Open Preview**。
 
 **命令行：**
 
 ```bash
-code --install-extension /完整路径/MDWork-vscode-1.0.0.1.vsix
+code --install-extension /完整路径/MDWork-vscode-1.0.0.2.vsix
 ```
 
 若终端提示找不到 `code`，在 VS Code 命令面板执行 **Shell Command: Install 'code' command in PATH**，或改用图形界面安装。
@@ -89,7 +89,7 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.1.vsix
 - **插入 URL**：插入网络图片或仅插入链接。
 - **导出 PDF**：导出活动分栏中的当前文档，可配置排版。
 - **编辑 / 分栏 / 预览**：切换每个编辑分栏中的源码/预览视图。
-- **¶ 隐藏字符**：显示或隐藏空格、Tab 等空白符号；控制字符显示始终开启。
+- **¶ 隐藏字符**：显示或隐藏空格、Tab 和不可见字符；空格显示为点，Tab 显示为箭头，控制字符、零宽字符和 BOM 等显示为 `[0x00]`、`[0x200B]`、`[0xFEFF]` 形式的十六进制码位。标记只用于查看，不会修改源文件。
 - **向右分栏 / 向下分栏**：增加编辑区域，最多横向 4 栏、纵向 3 栏。
 - **单栏**：恢复一个编辑区域，不删除其他文档标签。
 - **主题按钮 / 设置按钮**：切换明暗主题，或打开字体、隐藏字符、滚动同步和自动保存设置。
@@ -98,10 +98,10 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.1.vsix
 
 - 每个已打开文档都有全局唯一标签；同一文档也可在多个分栏中查看，但内容和未保存状态共享。
 - 每个分栏独立选择活动标签。点击编辑区或标签会激活该分栏，保存、图片插入和 PDF 导出均针对活动分栏的文档。
-- 关闭标签会从所有分栏移除该文档；有未保存修改时会先确认。
+- 关闭标签只移除当前分栏中的文档视图，其他分栏继续显示同一文件；当前分栏有其他标签时选择相邻标签，最后一个标签关闭后自动移除空分栏。只有关闭文件的最后一个分栏引用时，才会检查未保存修改并确认。
 - 默认编辑器与预览左右各占 50%。拖动中间分隔线可在 25%–75% 之间调整，双击恢复 50:50。
 - “向右分栏”最多增加为 4 列，“向下分栏”最多增加为 3 行，合计最多 12 个编辑区域；达到上限后对应按钮禁用。
-- 只有活动分栏自动刷新预览。其他分栏显示“激活此分栏后更新预览”，避免多个大文档同时解析。
+- 普通文档在活动分栏编辑后自动同步预览；预览顶部的“刷新预览”按钮可随时重新读取当前编辑器内容。其他分栏显示“激活此分栏后更新预览”，避免多个大文档同时解析。
 - 状态栏显示活动文档路径、未保存状态、操作消息、字符数和行数；标签上的 `●` 表示该文档有未保存修改。
 
 ### 3.3 快捷键
@@ -135,7 +135,7 @@ Monaco 的撤销、重做、查找、替换、多光标等快捷键遵循编辑�
 - **代码块字体**：影响代码和代码块。
 - **编辑器字号**：界面允许 10–28。
 - **预览字号**：界面允许 12–30。
-- **显示空格、Tab 等隐藏字符**：与工具栏“¶ 隐藏字符”同步；空格显示为点，Tab 显示为箭头。
+- **显示空格、Tab 和不可见字符（十六进制）**：与工具栏“¶ 隐藏字符”同步；空格显示为点，Tab 显示为箭头，其他不可见字符显示为十六进制码位。
 - **编辑器滚动时同步预览**：在分栏模式下按源行定位预览。
 - **停止输入 1.5 秒后自动保存**：仅自动保存已有路径的文件。
 

@@ -4,14 +4,14 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 ## 下载与文档
 
-> 下载链接指向 [GitHub Release 1.0.0.1](https://github.com/blood9009/mdwork/releases/tag/1.0.0.1) 中的实际构建产物；源码压缩包不包含二进制安装文件。
-> 发布标签与附件版本为 `1.0.0.1`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.1`。
+> 下载链接指向 [GitHub Release 1.0.0.2](https://github.com/blood9009/mdwork/releases/tag/1.0.0.2) 中的实际构建产物；源码压缩包不包含二进制安装文件。
+> 发布标签与附件版本为 `1.0.0.2`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.2`。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-win.zip)
-- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-vscode-1.0.0.1.vsix)
-- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/SHA256SUMS.txt)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-win.zip)
+- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-vscode-1.0.0.2.vsix)
+- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
 - [English Syntax and User Guide](docs/user-guide.en-US.md)
 - [Mermaid 与图表详细教程](docs/mermaid-guide.zh-CN.md)
@@ -23,7 +23,7 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 
 - Monaco 编辑、Markdown 语法高亮、50:50 实时预览、25%–75% 分栏调整。
 - 多文件标签、独立未保存状态，以及最多横向 4 栏、纵向 3 栏的 12 个编辑分栏。
-- 可切换空格、Tab 等空白符号和控制字符显示。
+- 可切换空格、Tab 标记，并以十六进制显示控制字符及其他不可见字符。
 - 大文件保留 Monaco 增量编辑，Markdown 解析移入 Web Worker；超过 1,000,000 字符默认暂停实时预览并可手动刷新。
 - 编辑 / 分栏 / 预览三种视图，编辑器到预览的源行滚动联动。
 - 自研 Markdown 解析器：常用 CommonMark、GFM 表格、任务列表、删除线。

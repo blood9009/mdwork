@@ -31,17 +31,17 @@ MDWork uses its own block parser, inline parser, AST and HTML renderer. `markdow
 
 These links point to build artifacts in the project `release` directory. A source-only checkout does not contain binaries until they are built.
 
-- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.1-macos-universal.dmg](../release/MDWork-1.0.0.1-macos-universal.dmg)
-- macOS Apple Silicon (arm64): [MDWork-1.0.0.1-macos-arm64.dmg](../release/MDWork-1.0.0.1-macos-arm64.dmg)
-- Windows x64 portable: [MDWork-1.0.0.1-win.zip](../release/MDWork-1.0.0.1-win.zip)
-- VS Code: [MDWork-vscode-1.0.0.1.vsix](../release/MDWork-vscode-1.0.0.1.vsix)
+- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.2-macos-universal.dmg](../release/MDWork-1.0.0.2-macos-universal.dmg)
+- macOS Apple Silicon (arm64): [MDWork-1.0.0.2-macos-arm64.dmg](../release/MDWork-1.0.0.2-macos-arm64.dmg)
+- Windows x64 portable: [MDWork-1.0.0.2-win.zip](../release/MDWork-1.0.0.2-win.zip)
+- VS Code: [MDWork-vscode-1.0.0.2.vsix](../release/MDWork-vscode-1.0.0.2.vsix)
 - Checksums: [SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS
 
 The Universal DMG contains both arm64 and x86_64 architectures and supports Apple Silicon (M-series) and Intel Macs. A separate arm64-only build is also available. If you are unsure which chip your Mac uses, choose the Universal build.
 
-1. Download and open `MDWork-1.0.0.1-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.1-macos-arm64.dmg`.
+1. Download and open `MDWork-1.0.0.2-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.2-macos-arm64.dmg`.
 2. Drag **MDWork.app** into **Applications**.
 3. Eject the disk image.
 4. Launch MDWork from Applications or Launchpad.
@@ -52,7 +52,7 @@ The Universal DMG contains both arm64 and x86_64 architectures and supports Appl
 
 The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE installer. It does not require installation into a system directory.
 
-1. Download `MDWork-1.0.0.1-win.zip` and verify its SHA-256 checksum.
+1. Download `MDWork-1.0.0.2-win.zip` and verify its SHA-256 checksum.
 2. In File Explorer, right-click the ZIP and choose **Extract All**. Extract it to a directory where you have read/write access; do not run the app from inside the ZIP preview.
 3. Open the extracted folder and double-click **MDWork.exe**.
 4. The portable build does not create Start-menu entries or an uninstaller. Create a shortcut to `MDWork.exe` if needed. To remove it, quit MDWork and delete the entire extracted folder.
@@ -66,14 +66,14 @@ The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE insta
 1. Open the Extensions view.
 2. Select the `…` menu in the Extensions view.
 3. Choose **Install from VSIX…**.
-4. Select `MDWork-vscode-1.0.0.1.vsix` and reload if prompted.
+4. Select `MDWork-vscode-1.0.0.2.vsix` and reload if prompted.
 5. Open a Markdown file.
 6. Press `Cmd/Ctrl + Shift + P` and run **MDWork: Open Preview**.
 
 **Command line:**
 
 ```bash
-code --install-extension /absolute/path/MDWork-vscode-1.0.0.1.vsix
+code --install-extension /absolute/path/MDWork-vscode-1.0.0.2.vsix
 ```
 
 If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** from the VS Code Command Palette, or use the GUI method.
@@ -89,7 +89,7 @@ If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** 
 - **Insert URL**: inserts either an embedded remote image or a link.
 - **Export PDF**: exports the active group's document with configurable layout.
 - **Edit / Split / Preview**: changes the source/preview view within each editor group.
-- **¶ Hidden characters**: toggles visible space and Tab markers; control-character rendering remains enabled.
+- **¶ Hidden characters**: toggles space, Tab and invisible-character markers. Spaces appear as dots, Tabs as arrows, and controls, zero-width characters and BOMs as hexadecimal code points such as `[0x00]`, `[0x200B]` and `[0xFEFF]`. These labels are view-only and never modify the source file.
 - **Split right / Split down**: adds editor groups up to 4 columns and 3 rows.
 - **Single group**: restores one editor group without deleting document tabs.
 - **Theme / Settings**: changes the theme or opens font, hidden-character, scroll-sync and auto-save settings.
@@ -100,10 +100,10 @@ The current Chinese desktop labels are 新建、打开、保存、另存为、�
 
 - Every open document has one global identity. It can appear in multiple groups while sharing content and dirty state.
 - Each group independently selects its active tab. Save, resource insertion and PDF export apply to the active group's document.
-- Closing a tab removes that document from every group, with confirmation when it has unsaved changes.
+- Closing a tab removes only that document view from the current group; other groups keep showing the same file. An adjacent tab is selected when available, and an empty group is removed. Unsaved-change confirmation is required only when closing the file's last group reference.
 - The initial editor/preview split is 50:50. Drag the divider between 25% and 75%, or double-click it to restore 50:50.
 - Split right creates up to 4 columns and split down up to 3 rows, for at most 12 editor groups. The relevant button is disabled at its limit.
-- Only the active group automatically refreshes its preview. Activate another group to update its preview on demand.
+- Normal documents synchronize the active group's preview after editing. The **Refresh preview** button above every preview rereads the current editor content on demand. Other groups wait until activated to avoid parsing multiple large documents at once.
 - The status bar shows the active document path, unsaved state, operation messages, character count and line count. A `●` on a tab means that document has unsaved changes.
 
 ### 3.3 Shortcuts
@@ -137,7 +137,7 @@ Open the gear button to configure:
 - **Code font**: inline code and code blocks.
 - **Editor size**: 10–28 in the UI.
 - **Preview size**: 12–30 in the UI.
-- **Show spaces, Tabs and other hidden characters**: synchronized with the toolbar toggle; spaces appear as dots and Tabs as arrows.
+- **Show spaces, Tabs and invisible characters (hexadecimal)**: synchronized with the toolbar toggle; spaces appear as dots, Tabs as arrows, and other invisible characters as hexadecimal code points.
 - **Sync preview when editor scrolls**: source-line-based preview positioning in split view.
 - **Auto-save after 1.5 seconds**: existing files only.
 

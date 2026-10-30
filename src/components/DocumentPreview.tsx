@@ -26,11 +26,15 @@ export const DocumentPreview = forwardRef<PreviewHandle, DocumentPreviewProps>(
     const [loading, setLoading] = useState(false);
     const [renderedRevision, setRenderedRevision] = useState(-1);
     const [manualRevision, setManualRevision] = useState<number | null>(null);
+    const [refreshRequest, setRefreshRequest] = useState(0);
     const largeFile = document.characterCount >= LARGE_FILE_CHARACTER_THRESHOLD;
     const paused = largeFile && renderedRevision !== document.revision && manualRevision !== document.revision;
 
     useEffect(() => {
-      if (viewMode === 'edit' || !active || largeFile && manualRevision !== document.revision) return;
+      if (viewMode === 'edit' || !active || largeFile && manualRevision !== document.revision) {
+        setLoading(false);
+        return;
+      }
       let current = true;
       const revision = document.revision;
       const timer = setTimeout(() => {
@@ -48,23 +52,28 @@ export const DocumentPreview = forwardRef<PreviewHandle, DocumentPreviewProps>(
         }).finally(() => {
           if (current) setLoading(false);
         });
-      }, largeFile ? 0 : 250);
+      }, 0);
       return () => {
         current = false;
         clearTimeout(timer);
       };
     }, [document.id, document.path, document.revision, document.characterCount, largeFile,
-      manualRevision, model, settings.theme, viewMode, active, onNotify]);
+      manualRevision, refreshRequest, model, settings.theme, viewMode, active, onNotify]);
 
     const notice = loading ? '正在后台解析并更新预览…'
       : paused ? `大文件实时预览已暂停（${document.characterCount.toLocaleString()} 字符）`
-        : renderedRevision !== document.revision && !active ? '激活此分栏后更新预览' : '';
+        : renderedRevision !== document.revision && !active ? '激活此分栏后更新预览'
+          : renderedRevision === document.revision ? '已与编辑器同步' : '正在等待同步…';
 
     return <div className="document-preview">
-      {notice && <div className="preview-notice">
+      <div className="preview-toolbar">
         <span>{notice}</span>
-        {paused && <button onClick={() => setManualRevision(document.revision)}>刷新预览</button>}
-      </div>}
+        <button title="立即读取当前编辑器内容并刷新预览" disabled={loading}
+          onClick={() => {
+            setManualRevision(document.revision);
+            setRefreshRequest((value) => value + 1);
+          }}>{loading ? '同步中…' : '⟳ 刷新预览'}</button>
+      </div>
       {!html && !loading && paused
         ? <div className="preview-empty">编辑保持流畅；需要检查时手动生成整篇预览。</div>
         : <MarkdownPreview ref={forwardedRef} html={html} settings={settings}

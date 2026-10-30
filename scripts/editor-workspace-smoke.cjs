@@ -9,7 +9,7 @@ const betaPath = path.join(outputDirectory, 'beta.md');
 const largePath = path.join(outputDirectory, 'large.md');
 const pdfPath = path.join(outputDirectory, 'smoke.pdf');
 app.setPath('userData', path.join(outputDirectory, 'user-data'));
-writeFileSync(alphaPath, '# Alpha\n\nspace  space\n\tTabbed\n\n**worker preview**\n', 'utf8');
+writeFileSync(alphaPath, '# Alpha\n\nspace  space\n\tTabbed\nASCII:\x00\x01\x07\x1b\x7f\x9f​﻿\n\n**worker preview**\n', 'utf8');
 writeFileSync(betaPath, '# Beta\n\n```mermaid\nflowchart LR\n  A[Beta] --> B[PDF]\n```\n', 'utf8');
 writeFileSync(largePath, `# Large\n\n${'x'.repeat(1_020_000)}\n`, 'utf8');
 const openPaths = [alphaPath, betaPath, largePath];
@@ -82,14 +82,44 @@ async function run() {
       tabs: editor.querySelectorAll('.view-overlays svg path').length };
   })()`);
   check('Monaco renders visible space and tab markers', true, JSON.stringify(whitespaceMarkers));
+  await waitFor(`(() => {
+    const labels = [...document.querySelectorAll('.editor-group.active .view-lines .mdwork-invisible-character')]
+      .map((item) => item.textContent);
+    return ['[0x00]', '[0x01]', '[0x07]', '[0x1B]', '[0x7F]', '[0x9F]', '[0x200B]', '[0xFEFF]']
+      .every((label) => labels.includes(label))
+      && document.querySelectorAll('.editor-group.active .view-lines .mdwork-invisible-source').length >= 8
+      && [...document.querySelectorAll('.editor-group.active .view-lines .mdwork-invisible-source')]
+        .every((item) => getComputedStyle(item).fontSize === '0px');
+  })()`);
+  check('Monaco renders hexadecimal invisible character labels', true);
   const whitespaceScreenshot = path.join(outputDirectory, 'whitespace.png');
   writeFileSync(whitespaceScreenshot, await window.webContents.capturePage().then((image) => image.toPNG()));
 
+  await evaluate(`document.querySelector('.editor-group.active .monaco-container textarea').focus()`);
+  window.webContents.insertText('\n#1\n##1\n\nPREVIEW_SYNC\n');
+  await waitFor(`(() => {
+    const preview = document.querySelector('.editor-group.active .markdown-preview');
+    return preview?.textContent.includes('PREVIEW_SYNC')
+      && [...preview.querySelectorAll('h2.numbered-heading')].some((heading) => heading.textContent === '1.1');
+  })()`);
+  check('compact ##1 heading renders after editing', true);
+  const previewSyncScreenshot = path.join(outputDirectory, 'preview-sync.png');
+  writeFileSync(previewSyncScreenshot, await window.webContents.capturePage().then((image) => image.toPNG()));
+  check('editing updates dirty state', await evaluate(`!!document.querySelector('.editor-group.active .document-tab.active .tab-dirty')`));
+  check('persistent preview refresh button', await evaluate(`(() => {
+    const button = document.querySelector('.editor-group.active .preview-toolbar button');
+    if (!button || button.disabled) return false;
+    button.click();
+    return true;
+  })()`));
+  await waitFor(`document.querySelector('.editor-group.active .preview-toolbar')?.textContent.includes('已与编辑器同步')`);
+  check('manual preview refresh completes', true);
+
   await evaluate(`[...document.querySelectorAll('.editor-group.active .document-tab-select')].find((tab) => tab.textContent.includes('large.md')).click()`);
   await waitFor(`document.querySelector('.large-file-badge')?.textContent.includes('大文件')`);
-  await waitFor(`document.querySelector('.editor-group.active .preview-notice')?.textContent.includes('实时预览已暂停')`);
+  await waitFor(`document.querySelector('.editor-group.active .preview-toolbar')?.textContent.includes('实时预览已暂停')`);
   check('large file starts with paused preview', true, `${statSync(largePath).size} bytes`);
-  check('manual large preview refresh', await evaluate(`(() => { const button = document.querySelector('.editor-group.active .preview-notice button'); if (!button) return false; button.click(); return true; })()`));
+  check('manual large preview refresh', await evaluate(`(() => { const button = document.querySelector('.editor-group.active .preview-toolbar button'); if (!button) return false; button.click(); return true; })()`));
   await waitFor(`document.querySelector('.editor-group.active .markdown-preview h1')?.textContent === 'Large'`, 60_000);
   check('large file manual preview rendered', true);
 
@@ -177,7 +207,7 @@ async function run() {
   check('real PDF file generated', pdfSize > 1000, `${pdfSize} bytes`);
   check('no disposed model errors', !consoleErrors.some((message) => /disposed|文档模型不存在/i.test(message)), consoleErrors.join('\n'));
 
-  const report = { outputDirectory, checks, consoleErrors, whitespaceScreenshot, gridScreenshot, pdfPath, pdfSize };
+  const report = { outputDirectory, checks, consoleErrors, whitespaceScreenshot, previewSyncScreenshot, gridScreenshot, pdfPath, pdfSize };
   writeFileSync(path.join(outputDirectory, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
   app.exit(0);
@@ -196,7 +226,7 @@ run().catch(async (error) => {
     return {
       activeGroup: document.querySelector('.editor-group.active')?.dataset.groupId,
       activeTab: document.querySelector('.editor-group.active .document-tab.active')?.textContent,
-      notice: document.querySelector('.editor-group.active .preview-notice')?.textContent,
+      notice: document.querySelector('.editor-group.active .preview-toolbar')?.textContent,
       status: document.querySelector('.statusbar')?.textContent,
       diagramCount: document.querySelectorAll('.editor-group.active .mermaid-diagram svg').length,
       whitespaceMarkers: {

@@ -30,7 +30,7 @@ const welcomeDocument = `# 欢迎使用 MDWork
 
 - Monaco 编辑器与 Markdown 语法高亮
 - 多文件标签页与最多 4 列 × 3 行分栏
-- 空格、Tab 等隐藏字符显示
+- 空格、Tab 和不可见字符十六进制标记
 - 大文件后台解析与手动预览
 - 实时预览和滚动联动
 - 样式化 PDF 导出
@@ -200,6 +200,15 @@ export default function App() {
     const document = getActiveDocument(workspaceRef.current);
     if (document) void saveDocument(document.id, saveAs);
   }, [saveDocument]);
+
+  useEffect(() => {
+    const unsubscribers = workspace.documentOrder.map((documentId) => models.subscribe(documentId, (stats) => {
+      dispatch({ type: 'patch-document', documentId, patch: stats });
+    }));
+    return () => {
+      for (const unsubscribe of unsubscribers) unsubscribe();
+    };
+  }, [models, workspace.documentOrder]);
 
   const closeDocument = useCallback((groupId: string, documentId: string) => {
     const state = workspaceRef.current;
@@ -410,7 +419,7 @@ export default function App() {
 
       <div className="workspace-toolbar">
         <button className={settings.showHiddenCharacters ? 'active-tool' : ''}
-          title="显示或隐藏空格、Tab 等空白符号"
+          title="显示或隐藏空格、Tab 和不可见字符的十六进制标记"
           onClick={() => setSettings({ ...settings, showHiddenCharacters: !settings.showHiddenCharacters })}>
           ¶ 隐藏字符
         </button>

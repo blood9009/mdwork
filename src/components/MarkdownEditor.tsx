@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { monaco } from '../editor/monaco';
+import { findInvisibleCharacters } from '../editor/invisibleCharacters';
 import type { AppSettings } from '../settings';
 
 interface MarkdownEditorBaseProps {
@@ -35,11 +36,14 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
     const scrollRef = useRef(onVisibleLineChange);
     const activateRef = useRef(onActivate);
     const changeRef = useRef(onChange);
+    const showHiddenCharactersRef = useRef(settings.showHiddenCharacters);
+    const refreshHiddenCharactersRef = useRef<() => void>(() => {});
     const documentIdRef = useRef(documentId ?? 'single-document');
     const viewStatesRef = useRef(new Map<string, monaco.editor.ICodeEditorViewState | null>());
     scrollRef.current = onVisibleLineChange;
     activateRef.current = onActivate;
     changeRef.current = onChange;
+    showHiddenCharactersRef.current = settings.showHiddenCharacters;
 
     useImperativeHandle(forwardedRef, () => ({
       revealLine(line) {
@@ -90,23 +94,77 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
         smoothScrolling: true,
         fontLigatures: true,
         renderWhitespace: 'selection',
-        renderControlCharacters: true,
+        renderControlCharacters: false,
         fixedOverflowWidgets: true,
         tabSize: 2,
       });
       editorRef.current = editor;
       documentIdRef.current = documentId ?? 'single-document';
+      const hiddenDecorations = editor.createDecorationsCollection();
+      let hiddenFrame: number | null = null;
+      const refreshHiddenCharacters = () => {
+        if (hiddenFrame !== null) return;
+        hiddenFrame = window.requestAnimationFrame(() => {
+          hiddenFrame = null;
+          const currentModel = editor.getModel();
+          if (!showHiddenCharactersRef.current || !currentModel) {
+            hiddenDecorations.clear();
+            return;
+          }
+          const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+          const seen = new Set<string>();
+          for (const visibleRange of editor.getVisibleRanges()) {
+            for (let lineNumber = visibleRange.startLineNumber; lineNumber <= visibleRange.endLineNumber; lineNumber += 1) {
+              const line = currentModel.getLineContent(lineNumber);
+              const start = lineNumber === visibleRange.startLineNumber ? visibleRange.startColumn - 1 : 0;
+              const end = lineNumber === visibleRange.endLineNumber
+                ? Math.min(line.length, visibleRange.endColumn - 1) : line.length;
+              for (const character of findInvisibleCharacters(line, start, end)) {
+                const key = `${lineNumber}:${character.index}`;
+                if (seen.has(key)) continue;
+                seen.add(key);
+                const column = character.index + 1;
+                decorations.push({
+                  range: { startLineNumber: lineNumber, startColumn: column, endLineNumber: lineNumber, endColumn: column + character.length },
+                  options: {
+                    inlineClassName: 'mdwork-invisible-source',
+                    inlineClassNameAffectsLetterSpacing: true,
+                    after: {
+                      content: character.label,
+                      inlineClassName: 'mdwork-invisible-character',
+                      inlineClassNameAffectsLetterSpacing: true,
+                      cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                    },
+                  },
+                });
+              }
+            }
+          }
+          hiddenDecorations.set(decorations);
+        });
+      };
+      refreshHiddenCharactersRef.current = refreshHiddenCharacters;
       const scrollDisposable = editor.onDidScrollChange(() => {
         const line = editor.getVisibleRanges()[0]?.startLineNumber ?? 1;
         scrollRef.current(line);
+        refreshHiddenCharacters();
       });
+      const layoutDisposable = editor.onDidLayoutChange(refreshHiddenCharacters);
+      const modelDisposable = editor.onDidChangeModel(refreshHiddenCharacters);
       const focusDisposable = editor.onDidFocusEditorText(() => activateRef.current?.());
       const changeDisposable = editor.onDidChangeModelContent(() => {
         if (!model) changeRef.current?.(editor.getValue());
+        refreshHiddenCharacters();
       });
+      refreshHiddenCharacters();
 
       return () => {
+        if (hiddenFrame !== null) window.cancelAnimationFrame(hiddenFrame);
+        refreshHiddenCharactersRef.current = () => {};
+        hiddenDecorations.clear();
         scrollDisposable.dispose();
+        layoutDisposable.dispose();
+        modelDisposable.dispose();
         focusDisposable.dispose();
         changeDisposable.dispose();
         editor.dispose();
@@ -134,9 +192,10 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
         fontFamily: settings.editorFont,
         fontSize: settings.editorFontSize,
         renderWhitespace: settings.showHiddenCharacters ? 'all' : 'selection',
-        renderControlCharacters: true,
+        renderControlCharacters: false,
         wordWrap: largeFile ? 'off' : 'on',
       });
+      refreshHiddenCharactersRef.current();
       monaco.editor.setTheme(settings.theme === 'dark' ? 'vs-dark' : 'vs');
     }, [settings.theme, settings.editorFont, settings.editorFontSize, settings.showHiddenCharacters, largeFile]);
 

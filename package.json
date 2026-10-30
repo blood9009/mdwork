@@ -1,7 +1,7 @@
 {
   "name": "mdwork",
-  "version": "1.0.1",
-  "releaseVersion": "1.0.0.1",
+  "version": "1.0.2",
+  "releaseVersion": "1.0.0.2",
   "private": true,
   "description": "A cross-platform Markdown editor with live preview and styled PDF export.",
   "main": "dist/electron/main.js",

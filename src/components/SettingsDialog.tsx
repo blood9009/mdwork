@@ -57,7 +57,7 @@ export function SettingsDialog({ settings, fonts, onChange, onClose }: SettingsD
         <label className="check-label">
           <input type="checkbox" checked={settings.showHiddenCharacters}
             onChange={(event) => patch('showHiddenCharacters', event.target.checked)} />
-          显示空格、Tab 等隐藏字符
+          显示空格、Tab 和不可见字符（十六进制）
         </label>
         <label className="check-label">
           <input type="checkbox" checked={settings.autoSave}
