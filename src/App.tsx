@@ -14,10 +14,9 @@ import { defaultSettings, loadSettings } from './settings';
 import { DocumentModelRegistry } from './editor/documentModels';
 import {
   activeDocument as getActiveDocument,
+  canSplit,
   createWorkspace,
-  MAX_EDITOR_COLUMNS,
-  MAX_EDITOR_ROWS,
-  visibleGroupIds,
+  editorGridSize,
   workspaceReducer,
   type WorkspaceDocument,
 } from './workspace/workspace';
@@ -120,6 +119,7 @@ export default function App() {
   const currentDocument = getActiveDocument(workspace);
   const documents = useMemo(() => workspace.documentOrder.map((id) => workspace.documents[id]), [workspace.documentOrder, workspace.documents]);
   const anyDirty = documents.some((document) => document.dirty);
+  const gridSize = editorGridSize(workspace);
 
   const notify = useCallback((message: string) => {
     setStatus(message);
@@ -201,12 +201,17 @@ export default function App() {
     if (document) void saveDocument(document.id, saveAs);
   }, [saveDocument]);
 
-  const closeDocument = useCallback((documentId: string) => {
-    const document = workspaceRef.current.documents[documentId];
+  const closeDocument = useCallback((groupId: string, documentId: string) => {
+    const state = workspaceRef.current;
+    const document = state.documents[documentId];
     if (!document) return;
-    if (document.dirty && !window.confirm(`“${documentTitle(document)}”有未保存的修改，确定关闭吗？`)) return;
-    dispatch({ type: 'close-document', documentId });
-    setTimeout(() => models.dispose(documentId), 0);
+    const lastReference = !Object.values(state.groups)
+      .some((group) => group.id !== groupId && group.documentIds.includes(documentId));
+    if (lastReference && document.dirty && !window.confirm(`“${documentTitle(document)}”有未保存的修改，确定关闭吗？`)) return;
+    dispatch({ type: 'close-document', groupId, documentId });
+    setTimeout(() => {
+      if (!workspaceRef.current.documents[documentId]) models.dispose(documentId);
+    }, 0);
   }, [models]);
 
   useEffect(() => {
@@ -366,8 +371,9 @@ export default function App() {
         void handleOpen();
       } else if (event.key.toLowerCase() === 'w') {
         event.preventDefault();
-        const document = getActiveDocument(workspaceRef.current);
-        if (document) closeDocument(document.id);
+        const state = workspaceRef.current;
+        const document = getActiveDocument(state);
+        if (document) closeDocument(state.activeGroupId, document.id);
       }
     };
     window.addEventListener('keydown', handleShortcut);
@@ -409,31 +415,32 @@ export default function App() {
           ¶ 隐藏字符
         </button>
         <span className="toolbar-separator" />
-        <button disabled={workspace.columns >= MAX_EDITOR_COLUMNS}
+        <button disabled={!canSplit(workspace, 'right')}
           onClick={() => dispatch({ type: 'split', direction: 'right' })}>向右分栏</button>
-        <button disabled={workspace.rows >= MAX_EDITOR_ROWS}
+        <button disabled={!canSplit(workspace, 'down')}
           onClick={() => dispatch({ type: 'split', direction: 'down' })}>向下分栏</button>
-        {(workspace.columns > 1 || workspace.rows > 1) && <button onClick={() => dispatch({ type: 'reset-grid' })}>单栏</button>}
-        <span className="layout-summary">{workspace.columns} 列 × {workspace.rows} 行</span>
+        {workspace.groupOrder.length > 1 && <button onClick={() => dispatch({ type: 'reset-grid' })}>单栏</button>}
+        <span className="layout-summary">{gridSize.columns} 列 × {gridSize.rows} 行</span>
         {currentDocument && currentDocument.characterCount >= LARGE_FILE_CHARACTER_THRESHOLD && <span className="large-file-badge">大文件模式</span>}
       </div>
 
       <main className="workspace">
         <div className="editor-grid" style={{
-          gridTemplateColumns: `repeat(${workspace.columns}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${workspace.rows}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${gridSize.columns}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${gridSize.rows}, minmax(0, 1fr))`,
         }}>
-          {visibleGroupIds(workspace.rows, workspace.columns).map((groupId) => {
+          {workspace.groupOrder.map((groupId) => {
             const group = workspace.groups[groupId];
             const document = group.activeDocumentId ? workspace.documents[group.activeDocumentId] ?? null : null;
+            const groupDocuments = group.documentIds.map((id) => workspace.documents[id]);
             return <WorkspaceGroup key={groupId} groupId={groupId} active={workspace.activeGroupId === groupId}
-              documents={documents} document={document} model={document ? models.get(document.id) : null}
+              documents={groupDocuments} document={document} model={document ? models.get(document.id) : null}
               settings={settings} viewMode={viewMode}
               editorRef={(handle) => { if (handle) editorRefs.current.set(groupId, handle); else editorRefs.current.delete(groupId); }}
               previewRef={(handle) => { if (handle) previewRefs.current.set(groupId, handle); else previewRefs.current.delete(groupId); }}
               onActivate={() => dispatch({ type: 'activate-group', groupId })}
               onSelectDocument={(documentId) => dispatch({ type: 'select-document', groupId, documentId })}
-              onCloseDocument={closeDocument}
+              onCloseDocument={(documentId) => closeDocument(groupId, documentId)}
               onNew={() => handleNew(groupId)} onOpen={() => void handleOpen(groupId)}
               onVisibleLineChange={(line) => {
                 if (settings.syncScroll && viewMode === 'split') previewRefs.current.get(groupId)?.scrollToSourceLine(line);

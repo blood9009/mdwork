@@ -117,6 +117,54 @@ async function run() {
   const gridScreenshot = path.join(outputDirectory, 'editor-grid.png');
   writeFileSync(gridScreenshot, await window.webContents.capturePage().then((image) => image.toPNG()));
 
+  await evaluate(`(() => {
+    const group = document.querySelectorAll('.editor-group')[1];
+    [...group.querySelectorAll('.document-tab-select')].find((tab) => tab.textContent.includes('alpha.md')).click();
+  })()`);
+  await waitFor(`(() => {
+    const groups = document.querySelectorAll('.editor-group');
+    return groups[0].querySelector('.document-tab.active').textContent.includes('alpha.md')
+      && groups[1].querySelector('.document-tab.active').textContent.includes('alpha.md');
+  })()`);
+  await evaluate(`document.querySelectorAll('.editor-group')[0].querySelector('.monaco-container textarea').focus()`);
+  window.webContents.insertText('\nSHARED_SPLIT_SYNC');
+  await waitFor(`(() => {
+    const groups = document.querySelectorAll('.editor-group');
+    return groups[0].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC')
+      && groups[1].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC');
+  })()`);
+  check('same file edits synchronize across groups', true);
+
+  await evaluate(`(() => {
+    const group = document.querySelectorAll('.editor-group')[0];
+    const tab = [...group.querySelectorAll('.document-tab')].find((item) => item.textContent.includes('alpha.md'));
+    tab.querySelector('.document-tab-close').click();
+  })()`);
+  await waitFor(`(() => {
+    const groups = document.querySelectorAll('.editor-group');
+    return groups.length === 12
+      && groups[0].querySelector('.document-tab.active').textContent.includes('beta.md')
+      && ![...groups[0].querySelectorAll('.document-tab')].some((tab) => tab.textContent.includes('alpha.md'))
+      && groups[1].querySelector('.document-tab.active').textContent.includes('alpha.md')
+      && groups[1].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC');
+  })()`);
+  check('close removes only the current group view and selects adjacent tab', true);
+
+  const removedGroupId = await evaluate(`document.querySelectorAll('.editor-group')[11].dataset.groupId`);
+  for (let index = 0; index < 3; index += 1) {
+    await evaluate(`(() => {
+      const groups = document.querySelectorAll('.editor-group');
+      groups[groups.length - 1].querySelector('.document-tab-close').click();
+    })()`);
+    await delay(200);
+  }
+  await waitFor(`document.querySelectorAll('.editor-group').length === 11`);
+  check('empty split is removed automatically', await evaluate(`(() => {
+    return ![...document.querySelectorAll('.editor-group')].some((group) => group.dataset.groupId === ${JSON.stringify(removedGroupId)})
+      && !!document.querySelector('.editor-group.active')
+      && !document.querySelector('.empty-editor-group');
+  })()`));
+
   check('reset to one group', await clickButton('单栏'));
   await waitFor(`document.querySelectorAll('.editor-group').length === 1`);
   await evaluate(`[...document.querySelectorAll('.editor-group.active .document-tab-select')].find((tab) => tab.textContent.includes('beta.md')).click()`);
@@ -127,6 +175,7 @@ async function run() {
   await waitFor(`!document.querySelector('.modal')`, 60_000);
   const pdfSize = statSync(pdfPath).size;
   check('real PDF file generated', pdfSize > 1000, `${pdfSize} bytes`);
+  check('no disposed model errors', !consoleErrors.some((message) => /disposed|文档模型不存在/i.test(message)), consoleErrors.join('\n'));
 
   const report = { outputDirectory, checks, consoleErrors, whitespaceScreenshot, gridScreenshot, pdfPath, pdfSize };
   writeFileSync(path.join(outputDirectory, 'report.json'), JSON.stringify(report, null, 2));
