@@ -1,0 +1,14 @@
+:root {
+  --text: var(--vscode-editor-foreground);
+  --panel: var(--vscode-editor-background);
+  --muted: var(--vscode-descriptionForeground);
+  --border: var(--vscode-panel-border);
+  --hover: var(--vscode-textCodeBlock-background);
+  --accent: var(--vscode-textLink-foreground);
+  --preview-font: var(--vscode-font-family);
+  --code-font: var(--vscode-editor-font-family);
+  --preview-size: var(--vscode-font-size, 14px);
+}
+html, body { margin: 0; padding: 0; min-height: 100%; background: var(--panel); }
+body { color: var(--text); }
+.markdown-preview { box-sizing: border-box; min-height: 100vh; overflow: visible; }

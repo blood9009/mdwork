@@ -1,0 +1,73 @@
+{
+  "name": "mdwork",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A cross-platform Markdown editor with live preview and styled PDF export.",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:main\" \"npm:dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:main": "tsc -p tsconfig.node.json --watch --preserveWatchOutput",
+    "dev:electron": "wait-on tcp:127.0.0.1:5173 dist/electron/main.js && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 node scripts/launch-electron.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "build": "npm run typecheck && npm run build:renderer && npm run build:main",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.node.json",
+    "build:vscode": "node scripts/build-vscode.mjs",
+    "start": "node scripts/launch-electron.mjs",
+    "test": "vitest run",
+    "test:mermaid": "node scripts/test-mermaid-compatibility.mjs",
+    "examples:generate": "node scripts/generate-mermaid-examples.mjs",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac dmg --arm64",
+    "dist:win": "npm run build && electron-builder --win zip --x64",
+    "dist:vscode": "npm run build:vscode && npm --prefix vscode-mdwork run package",
+    "release": "node scripts/release.mjs"
+  },
+  "dependencies": {
+    "dompurify": "^3.2.6",
+    "highlight.js": "^11.11.1",
+    "mermaid": "^11.12.0",
+    "monaco-editor": "^0.52.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sanitize-html": "^2.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/sanitize-html": "^2.16.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.mdwork.desktop",
+    "productName": "MDWork",
+    "directories": { "output": "release" },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "artifactName": "${productName}-${version}-macos-${arch}.${ext}",
+      "target": ["dmg"],
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": ["zip"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    }
+  }
+}

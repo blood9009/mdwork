@@ -6,9 +6,9 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 > 下载链接指向本项目 `release` 目录中的实际构建产物；源码压缩包不包含自动生成的二进制文件。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](release/MDWork-0.1.0-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](release/MDWork-0.1.0-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](release/MDWork-0.1.0-win.zip)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](release/MDWork-1.0.0-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](release/MDWork-1.0.0-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](release/MDWork-1.0.0-win.zip)
 - [VS Code 扩展（VSIX）](release/MDWork-vscode-0.1.0.vsix)
 - [发布文件 SHA-256 校验值](release/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
@@ -117,7 +117,7 @@ link 前端 -> 后端 | 请求
 link 后端 -> 前端 | 响应
 ```
 
-`layer` 开始新层，`title` 设置可选层标题，`columns 1..4` 设置层或分组列数，`group` / `end` 定义分组，`item` 添加条目，`span` 设置前一条目跨列，`link` 支持 `->`、`<-` 和 `<>`。与文档 JPG 对应的完整四层可编辑版本见 [1793322574256.md](docs/1793322574256.md)。
+`layer` 开始新层，`title` 设置可选层标题，`columns 1..4` 设置层或分组列数，`group` / `end` 定义分组，`item` 添加条目，`span` 设置前一条目跨列，`link` 支持 `->`、`<-` 和 `<>`。完整四层可编辑版本见 [四层架构图示例](docs/examples/layers-architecture.md)。
 
 ## 桌面版开发
 

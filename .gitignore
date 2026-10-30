@@ -1,0 +1,14 @@
+node_modules/
+dist/
+release/
+coverage/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+.claude/
+docs/markdown-editor-implementation-plan.md
+vscode-mdwork/dist/
+vscode-mdwork/media/markdown.css
+vscode-mdwork/media/preview.bundle.js
+vscode-mdwork/media/preview.bundle.js.map

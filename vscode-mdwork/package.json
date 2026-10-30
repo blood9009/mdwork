@@ -1,0 +1,38 @@
+{
+  "name": "mdwork",
+  "displayName": "MDWork Markdown Preview",
+  "description": "MDWork Markdown preview with compact headings, Mermaid, GFM and image wrapping.",
+  "version": "1.0.0",
+  "publisher": "mdwork",
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./dist/extension.cjs",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mdwork.openPreview",
+        "title": "MDWork: Open Preview"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node ../scripts/build-vscode.mjs",
+    "package": "vsce package --out ../release/MDWork-vscode-1.0.0.vsix"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^4.1.0"
+  }
+}

@@ -1,0 +1,4 @@
+node_modules/**
+media/preview.js
+**/*.map
+.gitignore
