@@ -26,6 +26,7 @@ const electronManifest = JSON.parse(await readFile(path.join(root, 'node_modules
 const electronVersion = electronManifest.version;
 const productName = manifest.build.productName;
 const version = manifest.version;
+const releaseVersion = manifest.releaseVersion ?? version;
 const cacheDir = path.resolve(process.env.MDWORK_ELECTRON_CACHE
   ?? path.join(releaseDir, '.electron-cache'));
 const builderCli = path.join(root, 'node_modules/electron-builder/out/cli/cli.js');
@@ -202,7 +203,7 @@ async function verifyUniversalApp(application) {
 }
 
 async function createDmg(application, architecture) {
-  const destination = path.join(releaseDir, `${productName}-${version}-macos-${architecture}.dmg`);
+  const destination = path.join(releaseDir, `${productName}-${releaseVersion}-macos-${architecture}.dmg`);
   const staging = await mkdtemp(path.join(tmpdir(), 'mdwork-dmg-'));
   try {
     await run('ditto', [application, path.join(staging, `${productName}.app`)]);
@@ -219,10 +220,10 @@ async function createDmg(application, architecture) {
 
 async function writeChecksums() {
   const filenames = [
-    `${productName}-${version}-macos-universal.dmg`,
-    `${productName}-${version}-macos-arm64.dmg`,
-    `${productName}-${version}-win.zip`,
-    `${productName}-vscode-${version}.vsix`,
+    `${productName}-${releaseVersion}-macos-universal.dmg`,
+    `${productName}-${releaseVersion}-macos-arm64.dmg`,
+    `${productName}-${releaseVersion}-win.zip`,
+    `${productName}-vscode-${releaseVersion}.vsix`,
   ].filter((filename) => existsSync(path.join(releaseDir, filename)));
   const lines = [];
   for (const filename of filenames) {
@@ -272,11 +273,23 @@ if (targets.macArm64) {
 if (targets.win) {
   const winDist = await ensureElectronDist('win32', 'x64');
   await buildElectron('win-zip', 'x64', winDist);
+  if (releaseVersion !== version) {
+    await rename(
+      path.join(releaseDir, `${productName}-${version}-win.zip`),
+      path.join(releaseDir, `${productName}-${releaseVersion}-win.zip`),
+    );
+  }
 }
 if (targets.vscode) {
   if (!existsSync(path.join(root, 'vscode-mdwork/node_modules/.bin/vsce'))) {
     await run(npm, ['--prefix', 'vscode-mdwork', 'install', '--ignore-scripts']);
   }
   await run(npm, ['run', 'dist:vscode']);
+  if (releaseVersion !== version) {
+    await rename(
+      path.join(releaseDir, `${productName}-vscode-${version}.vsix`),
+      path.join(releaseDir, `${productName}-vscode-${releaseVersion}.vsix`),
+    );
+  }
 }
 await writeChecksums();

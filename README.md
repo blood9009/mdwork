@@ -4,13 +4,14 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 ## 下载与文档
 
-> 下载链接指向 [GitHub Release 1.0.0.0](https://github.com/blood9009/mdwork/releases/tag/1.0.0.0) 中的实际构建产物；源码压缩包不包含二进制安装文件。
+> 下载链接指向 [GitHub Release 1.0.0.1](https://github.com/blood9009/mdwork/releases/tag/1.0.0.1) 中的实际构建产物；源码压缩包不包含二进制安装文件。
+> 发布标签与附件版本为 `1.0.0.1`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.1`。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-win.zip)
-- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-vscode-1.0.0.vsix)
-- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/SHA256SUMS.txt)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-1.0.0.1-win.zip)
+- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/MDWork-vscode-1.0.0.1.vsix)
+- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.1/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
 - [English Syntax and User Guide](docs/user-guide.en-US.md)
 - [Mermaid 与图表详细教程](docs/mermaid-guide.zh-CN.md)

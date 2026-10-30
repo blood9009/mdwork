@@ -31,17 +31,17 @@ MDWork uses its own block parser, inline parser, AST and HTML renderer. `markdow
 
 These links point to build artifacts in the project `release` directory. A source-only checkout does not contain binaries until they are built.
 
-- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0-macos-universal.dmg](../release/MDWork-1.0.0-macos-universal.dmg)
-- macOS Apple Silicon (arm64): [MDWork-1.0.0-macos-arm64.dmg](../release/MDWork-1.0.0-macos-arm64.dmg)
-- Windows x64 portable: [MDWork-1.0.0-win.zip](../release/MDWork-1.0.0-win.zip)
-- VS Code: [MDWork-vscode-1.0.0.vsix](../release/MDWork-vscode-1.0.0.vsix)
+- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.1-macos-universal.dmg](../release/MDWork-1.0.0.1-macos-universal.dmg)
+- macOS Apple Silicon (arm64): [MDWork-1.0.0.1-macos-arm64.dmg](../release/MDWork-1.0.0.1-macos-arm64.dmg)
+- Windows x64 portable: [MDWork-1.0.0.1-win.zip](../release/MDWork-1.0.0.1-win.zip)
+- VS Code: [MDWork-vscode-1.0.0.1.vsix](../release/MDWork-vscode-1.0.0.1.vsix)
 - Checksums: [SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS
 
 The Universal DMG contains both arm64 and x86_64 architectures and supports Apple Silicon (M-series) and Intel Macs. A separate arm64-only build is also available. If you are unsure which chip your Mac uses, choose the Universal build.
 
-1. Download and open `MDWork-1.0.0-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0-macos-arm64.dmg`.
+1. Download and open `MDWork-1.0.0.1-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.1-macos-arm64.dmg`.
 2. Drag **MDWork.app** into **Applications**.
 3. Eject the disk image.
 4. Launch MDWork from Applications or Launchpad.
@@ -52,7 +52,7 @@ The Universal DMG contains both arm64 and x86_64 architectures and supports Appl
 
 The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE installer. It does not require installation into a system directory.
 
-1. Download `MDWork-1.0.0-win.zip` and verify its SHA-256 checksum.
+1. Download `MDWork-1.0.0.1-win.zip` and verify its SHA-256 checksum.
 2. In File Explorer, right-click the ZIP and choose **Extract All**. Extract it to a directory where you have read/write access; do not run the app from inside the ZIP preview.
 3. Open the extracted folder and double-click **MDWork.exe**.
 4. The portable build does not create Start-menu entries or an uninstaller. Create a shortcut to `MDWork.exe` if needed. To remove it, quit MDWork and delete the entire extracted folder.
@@ -66,14 +66,14 @@ The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE insta
 1. Open the Extensions view.
 2. Select the `…` menu in the Extensions view.
 3. Choose **Install from VSIX…**.
-4. Select `MDWork-vscode-1.0.0.vsix` and reload if prompted.
+4. Select `MDWork-vscode-1.0.0.1.vsix` and reload if prompted.
 5. Open a Markdown file.
 6. Press `Cmd/Ctrl + Shift + P` and run **MDWork: Open Preview**.
 
 **Command line:**
 
 ```bash
-code --install-extension /absolute/path/MDWork-vscode-1.0.0.vsix
+code --install-extension /absolute/path/MDWork-vscode-1.0.0.1.vsix
 ```
 
 If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** from the VS Code Command Palette, or use the GUI method.

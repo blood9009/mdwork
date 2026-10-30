@@ -31,17 +31,17 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 以下链接对应项目 `release` 目录内的构建产物。直接打开源码仓库而未执行构建时，二进制文件可能尚未生成。
 
-- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0-macos-universal.dmg](../release/MDWork-1.0.0-macos-universal.dmg)
-- macOS Apple Silicon（arm64）：[MDWork-1.0.0-macos-arm64.dmg](../release/MDWork-1.0.0-macos-arm64.dmg)
-- Windows x64 便携版：[MDWork-1.0.0-win.zip](../release/MDWork-1.0.0-win.zip)
-- VS Code：[MDWork-vscode-1.0.0.vsix](../release/MDWork-vscode-1.0.0.vsix)
+- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0.1-macos-universal.dmg](../release/MDWork-1.0.0.1-macos-universal.dmg)
+- macOS Apple Silicon（arm64）：[MDWork-1.0.0.1-macos-arm64.dmg](../release/MDWork-1.0.0.1-macos-arm64.dmg)
+- Windows x64 便携版：[MDWork-1.0.0.1-win.zip](../release/MDWork-1.0.0.1-win.zip)
+- VS Code：[MDWork-vscode-1.0.0.1.vsix](../release/MDWork-vscode-1.0.0.1.vsix)
 - 校验值：[SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS 安装
 
 通用 DMG 同时包含 arm64 和 x86_64 架构，适用于 Apple Silicon（M 系列芯片）和 Intel Mac。另有仅含 arm64 的独立包；不确定芯片类型时选择通用版即可。
 
-1. 下载并双击 `MDWork-1.0.0-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0-macos-arm64.dmg`。
+1. 下载并双击 `MDWork-1.0.0.1-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0.1-macos-arm64.dmg`。
 2. 在打开的窗口中将 **MDWork.app** 拖入 **Applications（应用程序）**。
 3. 推出 DMG 磁盘映像。
 4. 从“应用程序”或 Launchpad 启动 MDWork。
@@ -52,7 +52,7 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 当前交付物是 Windows x64 **便携版 ZIP**，不是 Setup EXE 安装程序，也不需要安装到系统目录。
 
-1. 下载 `MDWork-1.0.0-win.zip`，并核对 SHA-256 校验值。
+1. 下载 `MDWork-1.0.0.1-win.zip`，并核对 SHA-256 校验值。
 2. 在文件资源管理器中右键 ZIP，选择“全部解压缩”，解压到自己有读写权限的目录；不要直接在压缩包预览中运行。
 3. 打开解压后的文件夹，双击 **MDWork.exe** 启动。
 4. 便携版不会自动创建开始菜单项或卸载程序。可为 `MDWork.exe` 自行创建快捷方式；退出应用后删除整个解压文件夹即可移除。
@@ -66,14 +66,14 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 1. 打开 VS Code 的“扩展”视图。
 2. 点击扩展视图右上角的 `…`。
 3. 选择 **Install from VSIX… / 从 VSIX 安装…**。
-4. 选择 `MDWork-vscode-1.0.0.vsix` 并按提示重新加载。
+4. 选择 `MDWork-vscode-1.0.0.1.vsix` 并按提示重新加载。
 5. 打开一个 Markdown 文件。
 6. 按 `Cmd/Ctrl + Shift + P`，执行 **MDWork: Open Preview**。
 
 **命令行：**
 
 ```bash
-code --install-extension /完整路径/MDWork-vscode-1.0.0.vsix
+code --install-extension /完整路径/MDWork-vscode-1.0.0.1.vsix
 ```
 
 若终端提示找不到 `code`，在 VS Code 命令面板执行 **Shell Command: Install 'code' command in PATH**，或改用图形界面安装。
