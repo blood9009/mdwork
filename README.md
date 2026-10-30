@@ -4,13 +4,13 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 ## 下载与文档
 
-> 下载链接指向本项目 `release` 目录中的实际构建产物；源码压缩包不包含自动生成的二进制文件。
+> 下载链接指向 [GitHub Release 1.0.0.0](https://github.com/blood9009/mdwork/releases/tag/1.0.0.0) 中的实际构建产物；源码压缩包不包含二进制安装文件。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](release/MDWork-1.0.0-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](release/MDWork-1.0.0-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](release/MDWork-1.0.0-win.zip)
-- [VS Code 扩展（VSIX）](release/MDWork-vscode-0.1.0.vsix)
-- [发布文件 SHA-256 校验值](release/SHA256SUMS.txt)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-1.0.0-win.zip)
+- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/MDWork-vscode-1.0.0.vsix)
+- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.0/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
 - [English Syntax and User Guide](docs/user-guide.en-US.md)
 - [Mermaid 与图表详细教程](docs/mermaid-guide.zh-CN.md)
