@@ -1,10 +1,12 @@
 import path from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import { registerAssetProtocol, registerAssetScheme } from './asset-protocol';
-import { importImage, openDocument, openDroppedDocument, openLocalResource, saveDocument } from './file-service';
+import { importImage, openDocument, openDroppedDocument, openLocalResource, readExportImage, saveDocument } from './file-service';
+import { saveImportedDocument, selectImportSource } from './document-import-service';
 import { listSystemFonts } from './font-service';
+import { exportDocx } from './docx-service';
 import { exportPdf } from './pdf-service';
-import type { PdfExportRequest } from '../shared/contracts';
+import type { DocxExportRequest, DocumentImportKind, ExportImageRequest, PdfExportRequest, SaveImportedDocumentRequest } from '../shared/contracts';
 
 registerAssetScheme();
 let mainWindow: BrowserWindow | null = null;
@@ -99,12 +101,40 @@ app.whenReady().then(() => {
     if (typeof documentPath !== 'string' || !documentPath) throw new Error('无效的文档路径');
     return importImage(mainWindow, documentPath);
   });
+  ipcMain.handle('document:select-import-source', (event, kind: DocumentImportKind) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    if (kind !== 'word' && kind !== 'pdf') throw new Error('不支持的导入格式');
+    return selectImportSource(mainWindow, kind);
+  });
+  ipcMain.handle('document:save-imported', (event, request: SaveImportedDocumentRequest) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    if (!request || typeof request.sourcePath !== 'string' || typeof request.markdown !== 'string'
+      || !Array.isArray(request.images) || !Array.isArray(request.warnings) || !Array.isArray(request.openPaths)) {
+      throw new Error('无效的文档导入参数');
+    }
+    return saveImportedDocument(mainWindow, request);
+  });
   ipcMain.handle('pdf:export', (_event, request: PdfExportRequest) => {
     if (!mainWindow) throw new Error('主窗口不可用');
     if (!request || typeof request.bodyHtml !== 'string' || !request.options) {
       throw new Error('无效的 PDF 导出参数');
     }
     return exportPdf(mainWindow, request);
+  });
+  ipcMain.handle('docx:export', (event, request: DocxExportRequest) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    if (!request || typeof request.title !== 'string'
+      || (request.sourcePath !== null && typeof request.sourcePath !== 'string') || !request.data) {
+      throw new Error('无效的 DOCX 导出参数');
+    }
+    return exportDocx(mainWindow, request);
+  });
+  ipcMain.handle('docx:read-image', (event, request: ExportImageRequest) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    if (!request || typeof request.documentPath !== 'string' || typeof request.source !== 'string') {
+      throw new Error('无效的图片读取参数');
+    }
+    return readExportImage(request.documentPath, request.source).then((data) => ({ data }));
   });
   ipcMain.handle('fonts:list', () => listSystemFonts());
   ipcMain.handle('shell:open-local', (event, documentPath: string, href: string) => {

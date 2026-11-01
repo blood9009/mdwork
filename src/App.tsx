@@ -5,6 +5,7 @@ import { WorkspaceGroup, documentTitle, type ViewMode } from './components/Works
 import { LARGE_FILE_CHARACTER_THRESHOLD } from './components/DocumentPreview';
 import { SettingsDialog } from './components/SettingsDialog';
 import { ExportDialog } from './components/ExportDialog';
+import { FormattingToolbar } from './components/FormattingToolbar';
 import { InsertUrlDialog } from './components/InsertUrlDialog';
 import { sanitizeMarkdown } from './markdown/sanitizeMarkdown';
 import { renderMermaidDiagrams } from './markdown/renderMermaidDiagrams';
@@ -20,7 +21,7 @@ import {
   workspaceReducer,
   type WorkspaceDocument,
 } from './workspace/workspace';
-import type { DocumentResult, PdfOptions } from '../shared/contracts';
+import type { DocumentImportKind, DocumentResult, ExportFormat, PdfOptions } from '../shared/contracts';
 
 const welcomeDocument = `# 欢迎使用 MDWork
 
@@ -32,6 +33,7 @@ const welcomeDocument = `# 欢迎使用 MDWork
 - 多文件标签页与最多 4 列 × 3 行分栏
 - 空格、Tab 和不可见字符十六进制标记
 - 大文件后台解析与手动预览
+- Word / PDF 本地导入为 Markdown
 - 实时预览和滚动联动
 - 样式化 PDF 导出
 
@@ -76,7 +78,7 @@ flowchart TD
 | 多标签与分栏 | 已支持 |
 | PDF 导出 | 已支持 |
 
-> 使用“打开”选择本地 Markdown 文件，也可以将文件直接拖入窗口；使用 Cmd/Ctrl + S 保存。
+> 使用“打开”选择本地 Markdown 文件，也可以将文件直接拖入窗口；使用“导入 Word”或“导入 PDF”转换文档，使用 Cmd/Ctrl + S 保存。
 `;
 
 function hasDraggedFiles(event: DragEvent<HTMLDivElement>): boolean {
@@ -105,8 +107,10 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
   const [urlDialogOpen, setUrlDialogOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState<DocumentImportKind | null>(null);
   const [status, setStatus] = useState('就绪');
   const [dragActive, setDragActive] = useState(false);
   const editorRefs = useRef(new Map<string, MarkdownEditorHandle>());
@@ -160,6 +164,39 @@ export default function App() {
       if (!acceptOpenedDocument(result, groupId)) setStatus('就绪');
     } catch (error) {
       notify(error instanceof Error ? error.message : '打开文件失败');
+    }
+  }, [acceptOpenedDocument, notify]);
+
+  const handleImportDocument = useCallback(async (kind: DocumentImportKind, groupId?: string) => {
+    const targetGroupId = groupId ?? workspaceRef.current.activeGroupId;
+    const label = kind === 'word' ? 'Word' : 'PDF';
+    setImporting(kind);
+    try {
+      setStatus(`正在选择并转换 ${label} 文件…`);
+      const source = await window.mdwork.selectImportSource(kind);
+      if (source.canceled) { notify(`已取消 ${label} 导入`); return; }
+      if (!source.path || !source.data) throw new Error('未读取到导入文件内容');
+      const converted = kind === 'word'
+        ? await import('./import/wordToMarkdown').then(({ convertWordToMarkdown }) => convertWordToMarkdown(source.data!))
+        : await import('./import/pdfToMarkdown').then(async ({ convertPdfToMarkdown }) => ({
+          markdown: await convertPdfToMarkdown(source.data!), images: [], warnings: [],
+        }));
+      const result = await window.mdwork.saveImportedDocument({
+        sourcePath: source.path,
+        markdown: converted.markdown,
+        images: converted.images,
+        warnings: converted.warnings,
+        openPaths: Object.values(workspaceRef.current.documents).map((document) => document.path),
+      });
+      if (result.canceled) { notify(`已取消 ${label} 导入`); return; }
+      const documentId = acceptOpenedDocument(result, targetGroupId);
+      if (!documentId) throw new Error('转换结果未能打开');
+      const warning = result.warnings?.length ? `（${result.warnings.length} 条格式提示）` : '';
+      notify(`已导入 ${label}：${result.path?.split(/[\\/]/).pop()}${warning}`);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : `${label} 导入失败`);
+    } finally {
+      setImporting(null);
     }
   }, [acceptOpenedDocument, notify]);
 
@@ -345,7 +382,7 @@ export default function App() {
     }
   }
 
-  async function handleExport(options: PdfOptions): Promise<boolean> {
+  async function handleExport(format: ExportFormat, options: PdfOptions): Promise<boolean> {
     const document = getActiveDocument(workspaceRef.current);
     if (!document) { notify('请先新建或打开文档'); return false; }
     const { id, path } = document;
@@ -357,12 +394,20 @@ export default function App() {
       const bodyHtml = await renderMermaidDiagrams(
         sanitizeMarkdown(current.html, path), settings.theme, 'image',
       );
+      if (format === 'docx') {
+        const { createDocxExport } = await import('./export/docxExport');
+        const converted = await createDocxExport(bodyHtml, title, path, options);
+        const result = await window.mdwork.exportDocx({ title, sourcePath: path, data: converted.data });
+        if (result.canceled) return false;
+        notify(`DOCX 已导出：${result.path}${converted.warnings.length ? `（${converted.warnings.length} 条格式提示）` : ''}`);
+        return true;
+      }
       const result = await window.mdwork.exportPdf({ title, sourcePath: path, bodyHtml, headings: current.headings, options });
       if (result.canceled) return false;
       notify(`PDF 已导出：${result.path}`);
       return true;
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'PDF 导出失败');
+      notify(error instanceof Error ? error.message : `${format.toUpperCase()} 导出失败`);
       return false;
     } finally {
       setExporting(false);
@@ -395,14 +440,33 @@ export default function App() {
       onDragLeave={handleDragLeave} onDrop={(event) => { void handleDrop(event); }}>
       <header className="toolbar">
         <div className="brand"><span className="brand-mark">M↓</span><strong>MDWork</strong></div>
-        <div className="toolbar-group">
-          <button onClick={() => handleNew()}>新建</button>
-          <button onClick={() => void handleOpen()}>打开</button>
-          <button onClick={() => saveActiveDocument()} disabled={!currentDocument} className={currentDocument?.dirty ? 'needs-save' : ''}>保存</button>
-          <button onClick={() => saveActiveDocument(true)} disabled={!currentDocument}>另存为</button>
+        <div className="toolbar-group" aria-label="文件工具">
+          <button onClick={() => handleNew()} title="新建 Markdown 文档">新建</button>
+          <button onClick={() => void handleOpen()} title="打开 Markdown（Cmd/Ctrl+O）">打开</button>
+          <button onClick={() => void handleImportDocument('word')} disabled={importing !== null}
+            title="将 Word .docx 本地转换为 Markdown，图片写入 assets">
+            {importing === 'word' ? '导入中…' : '导入 Word'}
+          </button>
+          <button onClick={() => void handleImportDocument('pdf')} disabled={importing !== null}
+            title="提取 PDF 文字层并本地转换为 Markdown；扫描件需先 OCR">
+            {importing === 'pdf' ? '导入中…' : '导入 PDF'}
+          </button>
+          <button onClick={() => saveActiveDocument()} disabled={!currentDocument}
+            title="保存（Cmd/Ctrl+S）" className={currentDocument?.dirty ? 'needs-save' : ''}>保存</button>
+          <button onClick={() => saveActiveDocument(true)} disabled={!currentDocument}
+            title="另存为（Cmd/Ctrl+Shift+S）">另存为</button>
+        </div>
+        <span className="toolbar-separator" />
+        <div className="toolbar-group" aria-label="资源工具">
           <button onClick={() => void handleImportImage()} disabled={!currentDocument} title="选择本地图片并复制到文档 assets 目录">导入图片</button>
           <button onClick={() => setUrlDialogOpen(true)} disabled={!currentDocument} title="插入 URL 图片或链接">插入 URL</button>
-          <button onClick={() => setExportOpen(true)} disabled={!currentDocument}>导出 PDF</button>
+        </div>
+        <span className="toolbar-separator" />
+        <div className="toolbar-group" aria-label="导出工具">
+          <button onClick={() => { setExportFormat('pdf'); setExportOpen(true); }} disabled={!currentDocument}
+            title="导出固定页面排版的 PDF">导出 PDF</button>
+          <button onClick={() => { setExportFormat('docx'); setExportOpen(true); }} disabled={!currentDocument}
+            title="导出可用 Word/WPS 编辑的 DOCX">导出 DOCX</button>
         </div>
         <div className="toolbar-spacer" />
         <div className="segmented" aria-label="视图模式">
@@ -432,6 +496,13 @@ export default function App() {
         <span className="layout-summary">{gridSize.columns} 列 × {gridSize.rows} 行</span>
         {currentDocument && currentDocument.characterCount >= LARGE_FILE_CHARACTER_THRESHOLD && <span className="large-file-badge">大文件模式</span>}
       </div>
+
+      <FormattingToolbar disabled={!currentDocument} fonts={fonts} defaultFont={settings.previewFont}
+        onInsertUrl={() => setUrlDialogOpen(true)} onFormat={(command) => {
+          const editor = editorRefs.current.get(workspaceRef.current.activeGroupId);
+          if (!currentDocument || !editor) { notify('请先选择要编辑的文档'); return; }
+          editor.format(command);
+        }} />
 
       <main className="workspace">
         <div className="editor-grid" style={{
@@ -480,7 +551,7 @@ export default function App() {
           insertResource(resource);
           notify(resource.mode === 'image' ? '已插入 URL 图片' : '已插入跳转链接');
         }} />}
-      {exportOpen && <ExportDialog settings={settings} exporting={exporting}
+      {exportOpen && <ExportDialog settings={settings} exporting={exporting} initialFormat={exportFormat}
         onExport={handleExport} onClose={() => setExportOpen(false)} />}
     </div>
   );

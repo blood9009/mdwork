@@ -4,14 +4,14 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 ## 下载与文档
 
-> 下载链接指向 [GitHub Release 1.0.0.2](https://github.com/blood9009/mdwork/releases/tag/1.0.0.2) 中的实际构建产物；源码压缩包不包含二进制安装文件。
-> 发布标签与附件版本为 `1.0.0.2`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.2`。
+> 下载链接指向 [GitHub Release 1.0.0.3](https://github.com/blood9009/mdwork/releases/tag/1.0.0.3) 中的实际构建产物；源码压缩包不包含二进制安装文件。
+> 发布标签与附件版本为 `1.0.0.3`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.3`。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-1.0.0.2-win.zip)
-- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/MDWork-vscode-1.0.0.2.vsix)
-- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.2/SHA256SUMS.txt)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-win.zip)
+- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-vscode-1.0.0.3.vsix)
+- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
 - [English Syntax and User Guide](docs/user-guide.en-US.md)
 - [Mermaid 与图表详细教程](docs/mermaid-guide.zh-CN.md)
@@ -22,6 +22,7 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 ## 已实现功能
 
 - Monaco 编辑、Markdown 语法高亮、50:50 实时预览、25%–75% 分栏调整。
+- 分组格式工具条：段落/标题、字体、字号、粗体、斜体、下划线、删除线、颜色、列表、代码、表格和分割线，并提供常用格式快捷键。
 - 多文件标签、独立未保存状态，以及最多横向 4 栏、纵向 3 栏的 12 个编辑分栏。
 - 可切换空格、Tab 标记，并以十六进制显示控制字符及其他不可见字符。
 - 大文件保留 Monaco 增量编辑，Markdown 解析移入 Web Worker；超过 1,000,000 字符默认暂停实时预览并可手动刷新。
@@ -30,17 +31,35 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 - MDWork 紧凑标题：数字和大小写字母自动分层连续编号，`*` 为无序节点。
 - 图片左浮动、右浮动、居中、受限制宽度和 `::clear` 结束环绕。
 - highlight.js 代码高亮。
-- Mermaid 11.17.2 内置图型静态预览及 PDF 导出，提供 48 个真实 SVG/PDF 渲染案例、常用围栏简写，以及原生、`LR` 横向和 `TD` 纵向思维导图。
-- 可编辑 `layers` 分层架构图：层标题、网格条目、分组、层间箭头和分组连线，支持预览及 PDF 导出。
+- Mermaid 11.17.2 内置图型静态预览及 PDF/DOCX 导出，提供 48 个真实 SVG/PDF 渲染案例、常用围栏简写，以及原生、`LR` 横向和 `TD` 纵向思维导图。
+- 可编辑 `layers` 分层架构图：层标题、网格条目、分组、层间箭头和分组连线，支持预览及 PDF 导出；DOCX 以文字内容回退。
 - 本地文件打开、保存、另存为、原子写入、未保存提醒和可选自动保存。
+- Word `.docx` 本地导入为 Markdown，保留可转换的标题、格式、列表、表格、链接和图片，图片提取到目标文档旁的 `assets`。
+- PDF 文字层本地导入为 Markdown，识别常见标题和列表并合并换行段落；扫描件需先 OCR。
 - 将一个或多个 Markdown / 文本文件拖入桌面窗口，分别作为标签打开。
 - 本地图片选择导入到文档旁 `assets`，重名不覆盖。
 - URL 图片嵌入或纯链接插入，HTTP/HTTPS/Mailto 外链跳转。
 - 当前文档目录内文件 / 文件夹链接，以及 `#标题`、`#text=文字`、`#line=行号` 本文定位。
 - macOS / Windows 系统字体枚举，编辑器、正文和代码字体独立设置。
 - A4 / Letter、横纵向、页边距、主题、目录和页码等 PDF 设置。
+- DOCX 本地导出：保留标题、列表、表格、链接、代码、文字样式和可读取的图片，Mermaid 嵌入为静态 PNG，可用 Word/WPS 继续编辑。
 - DOMPurify 与 PDF 导出端二次 HTML 清理。
 - VS Code `.vsix` 实时预览扩展，复用同一 Markdown 内核。
+
+## Word / PDF 导入
+
+点击工具栏“导入 Word”或“导入 PDF”，选择源文件，再选择新 Markdown 的保存位置。转换完全在本机进行，不上传文档，也不修改原 Word/PDF；保存成功后自动打开新标签。
+
+- Word 支持 `.docx`，旧 `.doc` 请先在 Word/WPS 中另存为 `.docx`。可转换标题、段落、粗体、列表、表格、链接和图片；复杂排版、文本框及不支持的嵌入对象可能需要转换后整理。图片写入目标 Markdown 旁的 `assets`，重名文件不会被覆盖。
+- PDF 提取已有文字层，按字号和文本布局识别常见标题、列表并合并段落换行。多栏页面、复杂表格和扫描阅读的顺序可能需要转换后校对。
+- 扫描版 PDF 没有文字层时会提示先 OCR，不生成空白或伪造的 Markdown。受密码保护的 PDF 需先解除密码保护。
+- 如果目标 Markdown 已在编辑器中打开，需另选保存路径，避免覆盖当前编辑内容。
+
+## 格式工具与 PDF / DOCX 导出
+
+选中文字后使用两条格式工具条，可设置段落、标题、字体、字号、粗体、斜体、下划线、删除线、颜色、列表和代码，也可插入表格、分割线及 URL。macOS 使用 `Cmd+B/I/U`，Windows 使用 `Ctrl+B/I/U`；删除线为 `Cmd/Ctrl+Shift+X`。字体、字号和颜色以受限的行内 HTML 保存，并同步应用到预览、PDF 和 DOCX。
+
+“导出 PDF”生成固定分页文档；“导出 DOCX”生成可继续编辑的 Word 文档。两者都读取当前编辑器快照，不依赖预览是否刷新，也不会覆盖源 Markdown。DOCX 中 Mermaid 为静态 PNG；无法读取的图片保留替代文字并显示格式提示，分层架构图按文字内容导出。
 
 ## 图片环绕速览
 
@@ -200,4 +219,4 @@ release/              本地生成的安装包和 VSIX（不提交源码仓库�
 
 ## 安全边界
 
-桌面渲染进程不启用 Node.js，只通过 contextBridge 暴露最小 IPC API。保存路径来自系统文件对话框或用户明确打开的文档。本地图片限制在当前文档目录内；导入图片来自系统文件选择框。外部链接仅允许 HTTP、HTTPS 和 Mailto。Mermaid 使用严格安全模式，SVG 独立清理；PDF 在隔离的隐藏 BrowserWindow 中生成。VS Code Webview 使用 CSP、资源目录限制和消息协议白名单。
+桌面渲染进程不启用 Node.js，只通过 contextBridge 暴露最小 IPC API。保存路径来自系统文件对话框或用户明确打开的文档。本地图片限制在当前文档目录内；导入图片和 Word/PDF 源文件来自系统文件选择框，文档转换在本地完成。外部链接仅允许 HTTP、HTTPS 和 Mailto。Mermaid 使用严格安全模式，SVG 独立清理；PDF 在隔离的隐藏 BrowserWindow 中生成。VS Code Webview 使用 CSP、资源目录限制和消息协议白名单。

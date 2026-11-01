@@ -1,7 +1,7 @@
 {
   "name": "mdwork",
-  "version": "1.0.2",
-  "releaseVersion": "1.0.0.2",
+  "version": "1.0.3",
+  "releaseVersion": "1.0.0.3",
   "private": true,
   "description": "A cross-platform Markdown editor with live preview and styled PDF export.",
   "main": "dist/electron/main.js",
@@ -26,24 +26,31 @@
     "release": "node scripts/release.mjs"
   },
   "dependencies": {
+    "docx": "^9.15.1",
     "dompurify": "^3.2.6",
     "highlight.js": "^11.11.1",
+    "mammoth": "^1.13.0",
     "mermaid": "^11.12.0",
     "monaco-editor": "^0.52.2",
+    "pdfjs-dist": "^6.4.299",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "sanitize-html": "^2.17.0"
+    "sanitize-html": "^2.17.0",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/sanitize-html": "^2.16.0",
+    "@types/turndown": "^5.0.6",
     "@vitejs/plugin-react": "^4.5.0",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^37.2.0",
     "electron-builder": "^26.0.12",
+    "pdf-lib": "^1.17.1",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.4",
@@ -52,18 +59,25 @@
   "build": {
     "appId": "com.mdwork.desktop",
     "productName": "MDWork",
-    "directories": { "output": "release" },
+    "directories": {
+      "output": "release"
+    },
     "files": [
       "dist/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/@napi-rs/**"
     ],
     "mac": {
       "artifactName": "${productName}-${version}-macos-${arch}.${ext}",
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "category": "public.app-category.productivity"
     },
     "win": {
-      "target": ["zip"]
+      "target": [
+        "zip"
+      ]
     },
     "nsis": {
       "oneClick": false,

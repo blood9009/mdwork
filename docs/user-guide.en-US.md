@@ -8,7 +8,7 @@ Products: MDWork Desktop and MDWork Markdown Preview for VS Code
 
 ## 1. Overview
 
-MDWork is a local Markdown writing, live-preview and PDF-export application. The desktop app places the editor on the left and preview on the right by default. The VS Code extension provides a live preview beside the active Markdown editor.
+MDWork is a local Markdown writing, live-preview and PDF/DOCX-export application. The desktop app places the editor on the left and preview on the right by default. The VS Code extension provides a live preview beside the active Markdown editor.
 
 MDWork uses its own block parser, inline parser, AST and HTML renderer. `markdown-it` is not the main parser. highlight.js provides syntax highlighting, while Mermaid is used only for diagram parsing and layout.
 
@@ -23,25 +23,27 @@ MDWork uses its own block parser, inline parser, AST and HTML renderer. `markdow
 | Up to 4 columns × 3 rows of editor groups | Yes | Use VS Code's own layout |
 | Worker parsing and manual preview for large files | Yes | Use VS Code document handling |
 | New/Open/Save/Save As | Yes | Use VS Code commands |
+| Word/PDF import to Markdown | Yes | Not provided |
 | Toolbar image import and copying | Yes | Not provided; manage files in VS Code |
-| Styled PDF export | Yes | Not provided |
+| Grouped formatting toolbars and shortcuts | Yes | Use VS Code editing features |
+| Styled PDF and editable DOCX export | Yes | Not provided |
 | System-font settings | Yes | Uses VS Code fonts and themes |
 
 ## 2. Downloads and installation
 
 These links point to build artifacts in the project `release` directory. A source-only checkout does not contain binaries until they are built.
 
-- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.2-macos-universal.dmg](../release/MDWork-1.0.0.2-macos-universal.dmg)
-- macOS Apple Silicon (arm64): [MDWork-1.0.0.2-macos-arm64.dmg](../release/MDWork-1.0.0.2-macos-arm64.dmg)
-- Windows x64 portable: [MDWork-1.0.0.2-win.zip](../release/MDWork-1.0.0.2-win.zip)
-- VS Code: [MDWork-vscode-1.0.0.2.vsix](../release/MDWork-vscode-1.0.0.2.vsix)
+- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.3-macos-universal.dmg](../release/MDWork-1.0.0.3-macos-universal.dmg)
+- macOS Apple Silicon (arm64): [MDWork-1.0.0.3-macos-arm64.dmg](../release/MDWork-1.0.0.3-macos-arm64.dmg)
+- Windows x64 portable: [MDWork-1.0.0.3-win.zip](../release/MDWork-1.0.0.3-win.zip)
+- VS Code: [MDWork-vscode-1.0.0.3.vsix](../release/MDWork-vscode-1.0.0.3.vsix)
 - Checksums: [SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS
 
 The Universal DMG contains both arm64 and x86_64 architectures and supports Apple Silicon (M-series) and Intel Macs. A separate arm64-only build is also available. If you are unsure which chip your Mac uses, choose the Universal build.
 
-1. Download and open `MDWork-1.0.0.2-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.2-macos-arm64.dmg`.
+1. Download and open `MDWork-1.0.0.3-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.3-macos-arm64.dmg`.
 2. Drag **MDWork.app** into **Applications**.
 3. Eject the disk image.
 4. Launch MDWork from Applications or Launchpad.
@@ -52,7 +54,7 @@ The Universal DMG contains both arm64 and x86_64 architectures and supports Appl
 
 The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE installer. It does not require installation into a system directory.
 
-1. Download `MDWork-1.0.0.2-win.zip` and verify its SHA-256 checksum.
+1. Download `MDWork-1.0.0.3-win.zip` and verify its SHA-256 checksum.
 2. In File Explorer, right-click the ZIP and choose **Extract All**. Extract it to a directory where you have read/write access; do not run the app from inside the ZIP preview.
 3. Open the extracted folder and double-click **MDWork.exe**.
 4. The portable build does not create Start-menu entries or an uninstaller. Create a shortcut to `MDWork.exe` if needed. To remove it, quit MDWork and delete the entire extracted folder.
@@ -66,14 +68,14 @@ The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE insta
 1. Open the Extensions view.
 2. Select the `…` menu in the Extensions view.
 3. Choose **Install from VSIX…**.
-4. Select `MDWork-vscode-1.0.0.2.vsix` and reload if prompted.
+4. Select `MDWork-vscode-1.0.0.3.vsix` and reload if prompted.
 5. Open a Markdown file.
 6. Press `Cmd/Ctrl + Shift + P` and run **MDWork: Open Preview**.
 
 **Command line:**
 
 ```bash
-code --install-extension /absolute/path/MDWork-vscode-1.0.0.2.vsix
+code --install-extension /absolute/path/MDWork-vscode-1.0.0.3.vsix
 ```
 
 If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** from the VS Code Command Palette, or use the GUI method.
@@ -85,21 +87,33 @@ If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** 
 - **New**: creates an empty document tab without replacing open files.
 - **Open**: opens a document in a new tab; opening the same path again focuses its existing tab.
 - **Save / Save As**: saves the active group's current document, asking for a location if it is untitled.
+- **Import Word**: converts a local `.docx` file into a new Markdown document, preserving recognizable headings, common formatting, lists, tables, links and images.
+- **Import PDF**: extracts the text layer of a local PDF into a new Markdown document; scanned files require OCR first.
 - **Import image**: copies a selected local image into `assets` beside the document and inserts Markdown.
 - **Insert URL**: inserts either an embedded remote image or a link.
-- **Export PDF**: exports the active group's document with configurable layout.
+- **Export PDF**: exports the active group's document with fixed page layout.
+- **Export DOCX**: exports the active group's document as an editable `.docx` for Word/WPS.
 - **Edit / Split / Preview**: changes the source/preview view within each editor group.
 - **¶ Hidden characters**: toggles space, Tab and invisible-character markers. Spaces appear as dots, Tabs as arrows, and controls, zero-width characters and BOMs as hexadecimal code points such as `[0x00]`, `[0x200B]` and `[0xFEFF]`. These labels are view-only and never modify the source file.
 - **Split right / Split down**: adds editor groups up to 4 columns and 3 rows.
 - **Single group**: restores one editor group without deleting document tabs.
 - **Theme / Settings**: changes the theme or opens font, hidden-character, scroll-sync and auto-save settings.
 
-The current Chinese desktop labels are 新建、打开、保存、另存为、导入图片、插入 URL、导出 PDF、编辑、分栏、预览、¶ 隐藏字符、向右分栏、向下分栏、单栏.
+Two formatting toolbar rows sit below the main toolbar:
+
+- **Paragraph and character tools**: body/level 1–6 headings, quote, system font, common sizes from 10–32 pt, bold, italic, underline, strikethrough, inline code and color.
+- **List and insertion tools**: bullets, numbered lists, task lists, code blocks, a three-column table, thematic break and URL.
+
+Select text before applying character formatting. Choosing bold again removes an existing outer wrapper. With no selection, inline tools insert and select a placeholder; heading, list and quote tools insert their markers on an empty line. Commands apply to the active editor group, and other groups showing the same file share the edit.
+
+Font, size and color are stored as `<span style="…">` inline HTML. Only a font family, 1–72 pt size and `#RRGGBB` color are allowed; arbitrary CSS remains blocked. These styles carry into preview, PDF and DOCX. Use standard Markdown formatting instead when plain-source portability is more important.
+
+The current Chinese desktop labels are 新建、打开、导入 Word、导入 PDF、保存、另存为、导入图片、插入 URL、导出 PDF、导出 DOCX、编辑、分栏、预览、¶ 隐藏字符、向右分栏、向下分栏、单栏.
 
 ### 3.2 Tabs, editor groups and status bar
 
 - Every open document has one global identity. It can appear in multiple groups while sharing content and dirty state.
-- Each group independently selects its active tab. Save, resource insertion and PDF export apply to the active group's document.
+- Each group independently selects its active tab. Save, formatting commands, resource insertion and PDF/DOCX export apply to the active group's document.
 - Closing a tab removes only that document view from the current group; other groups keep showing the same file. An adjacent tab is selected when available, and an empty group is removed. Unsaved-change confirmation is required only when closing the file's last group reference.
 - The initial editor/preview split is 50:50. Drag the divider between 25% and 75%, or double-click it to restore 50:50.
 - Split right creates up to 4 columns and split down up to 3 rows, for at most 12 editor groups. The relevant button is disabled at its limit.
@@ -114,6 +128,10 @@ The current Chinese desktop labels are 新建、打开、保存、另存为、�
 | Save As | `Cmd + Shift + S` | `Ctrl + Shift + S` |
 | Open | `Cmd + O` | `Ctrl + O` |
 | Close active document | `Cmd + W` | `Ctrl + W` |
+| Bold | `Cmd + B` | `Ctrl + B` |
+| Italic | `Cmd + I` | `Ctrl + I` |
+| Underline | `Cmd + U` | `Ctrl + U` |
+| Strikethrough | `Cmd + Shift + X` | `Ctrl + Shift + X` |
 | VS Code Command Palette | `Cmd + Shift + P` | `Ctrl + Shift + P` |
 
 Undo, redo, find, replace and multi-cursor shortcuts follow Monaco and platform conventions.
@@ -126,7 +144,27 @@ Drop one or more supported files into the window to open each as an independent 
 
 Saving uses a temporary file followed by replacement. Each document has independent dirty state and auto-save timing. Auto-save applies only to documents that already have a local path; an untitled document still requires an explicit save location.
 
-Large files are still read completely as UTF-8 into one Monaco model; this is not chunked loading or unlimited-file support. Keystrokes do not copy the full document, and Markdown parsing runs in a Web Worker. At 1,000,000 characters, MDWork disables word wrap and pauses live preview by default. Choose **Refresh preview** to parse the current revision manually. Save and PDF export always read the current document snapshot.
+Large files are still read completely as UTF-8 into one Monaco model; this is not chunked loading or unlimited-file support. Keystrokes do not copy the full document, and Markdown parsing runs in a Web Worker. At 1,000,000 characters, MDWork disables word wrap and pauses live preview by default. Choose **Refresh preview** to parse the current revision manually. Save and PDF/DOCX export always read the current document snapshot.
+
+### 3.5 Import Word or PDF
+
+The import flow is **choose source file → choose a Markdown destination → convert and open a new tab**. Parsing is performed entirely on your computer. Files are not uploaded, and the original Word/PDF is never overwritten or modified. Canceling either file dialog produces no new document.
+
+**Word:**
+
+1. Choose **Import Word** and select a `.docx` file. For legacy `.doc`, use Word/WPS to save a `.docx` copy first.
+2. Choose the Markdown destination. The default is a same-named `.md` beside the source file.
+3. Recognizable headings, paragraphs, bold text, lists, tables, links and images are preserved. The first table row becomes the GFM header. Complex merged cells, text boxes, floating layout and unsupported embedded objects may need manual cleanup.
+4. Images are extracted into `assets` beside the destination Markdown with generated names. Existing images are not overwritten. Keep this directory with the Markdown when moving it.
+
+**PDF:**
+
+1. Choose **Import PDF** and select a `.pdf` that has a text layer.
+2. Choose the new Markdown destination. Text coordinates and font sizes are used to recognize common level 1–3 headings, bullets and numbered lists, join wrapped paragraphs and repair English hyphenation.
+3. PDF import focuses on text content rather than reproducing page layout. Review multi-column pages, complex tables, headers, footers and unusual reading order after conversion.
+4. A scanned or image-only PDF without a text layer produces an explicit OCR-first message, not empty or invented content. Remove password protection before importing an encrypted PDF.
+
+If the destination Markdown is already open in the editor, import stops and asks for another path to protect current edits. The resulting Markdown is an ordinary editable document and supports the normal save, preview and PDF-export features.
 
 ## 4. Editor settings
 
@@ -412,7 +450,7 @@ root((MDWork))
 
 Use `TD` instead of `LR` for top-down growth. Directional fences contain a single-root indentation tree without another `mindmap` declaration; icon decorators are not supported in this mode. Use the native fence for advanced native syntax.
 
-Mermaid 11.17.2 runs in strict mode with static SVG output. Click events, JavaScript callbacks and interactive mode are not supported. Diagram errors show the error and original source without blocking other content. Desktop PDF export uses sanitized SVG images.
+Mermaid 11.17.2 runs in strict mode with static SVG output. Click events, JavaScript callbacks and interactive mode are not supported. Diagram errors show the error and original source without blocking other content. Desktop PDF export uses sanitized SVG images, while DOCX export embeds static PNG images.
 
 See the [detailed Chinese Mermaid guide](mermaid-guide.zh-CN.md) and [48 tested examples](examples/mermaid-gallery.md) for the complete diagram/shorthand matrix and troubleshooting.
 
@@ -428,11 +466,15 @@ Escape a cell pipe as `a\|b`; code spans can also contain pipes. Headers, alignm
 
 ### 5.13 Raw HTML and security limits
 
-Common embedded HTML is sanitized. Scripts, event handlers, dangerous URLs, forms and raw style attributes do not gain execution capability. Image widths are converted through a dedicated whitelist rather than enabling arbitrary CSS.
+Common embedded HTML is sanitized. Scripts, event handlers, dangerous URLs, forms and arbitrary CSS do not gain execution capability. A `<span>` created by the formatting tools may contain only `font-family`, a 1–72 pt `font-size` and a `#RRGGBB` `color`; other elements and styles remain subject to the whitelist. Image widths use a separate dedicated whitelist.
 
 This release does **not claim complete support** for math, footnotes, definition lists, wiki links, embedded documents or every pathological CommonMark edge case. Verify such documents rather than assuming those extensions are available.
 
-## 6. PDF export
+## 6. PDF and DOCX export
+
+Both formats apply to the active group and read the current Monaco document snapshot directly. They do not depend on preview freshness and never overwrite the source Markdown. Switch formats inside the export dialog if needed. Canceling the system save dialog writes no file.
+
+### 6.1 PDF
 
 1. Save or confirm the current content and image paths.
 2. Choose **Export PDF**.
@@ -452,7 +494,18 @@ This release does **not claim complete support** for math, footnotes, definition
 
 The PDF is not a screenshot: toolbars and split panes are excluded. Headings are kept from being stranded at page bottoms where possible, long tables repeat headers and code can wrap. Image wrapping, `::clear`, compact numbers, the TOC and link styling are carried into the PDF. Float pagination follows Chromium layout rules; review important print documents page by page.
 
-The VS Code extension does not currently provide PDF export. Use the desktop app for that workflow.
+### 6.2 DOCX
+
+1. Choose **Export DOCX**, or switch the export dialog format to DOCX.
+2. Configure paper, orientation, margins, body/code fonts, size, line height, page numbers, table of contents and code/table backgrounds. PDF style themes do not apply to DOCX.
+3. Choose **Select destination and export** and specify a new `.docx` path.
+4. The Open XML document preserves convertible headings, paragraphs, bold, italic, underline, strikethrough, links, lists, tables, code, inline font/size/color and images for further editing in Word/WPS.
+
+Mermaid diagrams are rendered and embedded as static PNG images without JavaScript callbacks or interaction scripts. The table of contents is a Word field; update it in Word/WPS to refresh its page numbers. If an image cannot be read or converted, its alt text remains in the body and a formatting notice appears in the status bar rather than writing a broken image into the DOCX.
+
+`layers` architecture diagrams currently export as text with a notice. Use PDF when their exact graphical layout matters. Complex floats, wrapping and pagination are not identical to PDF; review important documents in Word/WPS after export.
+
+The VS Code extension does not currently provide PDF/DOCX export. Use the desktop app for that workflow.
 
 ## 7. Troubleshooting
 
@@ -475,7 +528,7 @@ The VS Code extension does not currently provide PDF export. Use the desktop app
 - Use a `mermaid` fence with a complete declaration, or a supported shorthand without repeating that declaration.
 - Standard fences pass native source through unchanged; directional mind maps use a controlled conversion.
 - Native `mindmap` uses automatic layout. Use `mindmap LR` / `mindmap TD` for explicit horizontal or vertical growth.
-- Large files pause live preview by default; choose **Refresh preview**. PDF export does not depend on preview freshness.
+- Large files pause live preview by default; choose **Refresh preview**. PDF/DOCX export does not depend on preview freshness.
 
 ### A link does not open
 
@@ -483,14 +536,15 @@ The VS Code extension does not currently provide PDF export. Use the desktop app
 - Relative file links are not a mechanism for launching arbitrary local programs.
 - Check the default browser and mail-client configuration.
 
-### PDF images or layout differ
+### PDF/DOCX images or layout differ
 
 - Confirm that preview images and diagrams have loaded first.
-- Remote resources must remain accessible during export.
-- Check that selected fonts exist and inspect float/page breaks after export.
+- Remote resources must remain accessible during export and permit cross-origin image reads.
+- For DOCX image failures, check the formatting notice in the status bar and alt text retained in the body.
+- Check that selected fonts exist. Inspect PDF float/page breaks and review editable DOCX layout in Word/WPS.
 
 ## 8. Data and security
 
-MDWork Desktop reads and writes local documents without requiring an account or cloud service. Its renderer has no Node.js integration and uses restricted IPC for files, fonts, images and PDF operations. Local images are confined to the document directory, external protocols are restricted, and HTML/SVG is sanitized. The VS Code Webview uses CSP, typed messages and limited local-resource roots.
+MDWork Desktop reads and writes local documents without requiring an account or cloud service. Its renderer has no Node.js integration and uses restricted IPC for files, fonts, images and document export. Local images are confined to the document directory, external protocols are restricted, and HTML/SVG is sanitized. The VS Code Webview uses CSP, typed messages and limited local-resource roots.
 
-Image import copies files. PDF export writes to a user-selected destination. Remote images and external links access the network according to document content and user actions.
+Image import copies files. PDF/DOCX export writes to a user-selected destination. Remote images and external links access the network according to document content and user actions.

@@ -10,6 +10,10 @@ function normalizePath(filePath: string): string {
   return path.normalize(path.resolve(filePath));
 }
 
+export function authorizeDocumentPath(filePath: string): void {
+  authorizedPaths.add(normalizePath(filePath));
+}
+
 function isInside(parent: string, candidate: string): boolean {
   const relative = path.relative(parent, candidate);
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
@@ -38,7 +42,7 @@ async function readDocument(selectedPath: string): Promise<DocumentResult> {
   const stat = await fs.stat(filePath);
   if (!stat.isFile()) throw new Error('选择的项目不是文件。');
   const content = await fs.readFile(filePath, 'utf8');
-  authorizedPaths.add(filePath);
+  authorizeDocumentPath(filePath);
   return { canceled: false, path: filePath, content, size: stat.size };
 }
 
@@ -143,6 +147,16 @@ export async function openLocalResource(documentPath: string, href: string): Pro
   if (error) throw new Error(error);
 }
 
+export async function readExportImage(documentPath: string, source: string): Promise<Buffer> {
+  if (!authorizedPaths.has(normalizePath(documentPath))) throw new Error('文档路径尚未获得图片读取授权');
+  const resourcePath = await resolveLocalResourcePath(documentPath, source);
+  if (!imageExtensions.has(path.extname(resourcePath).toLowerCase())) throw new Error('不支持导出此图片格式');
+  const stat = await fs.stat(resourcePath);
+  if (!stat.isFile()) throw new Error('图片路径不是文件');
+  if (stat.size > 30 * 1024 * 1024) throw new Error('图片超过 30 MB，无法嵌入 DOCX');
+  return fs.readFile(resourcePath);
+}
+
 export async function saveDocument(
   window: BrowserWindow,
   currentPath: string | null,
@@ -164,6 +178,6 @@ export async function saveDocument(
   }
 
   await atomicWriteFile(filePath, content);
-  authorizedPaths.add(filePath);
+  authorizeDocumentPath(filePath);
   return { canceled: false, path: filePath };
 }

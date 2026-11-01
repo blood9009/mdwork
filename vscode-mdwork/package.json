@@ -2,7 +2,7 @@
   "name": "mdwork",
   "displayName": "MDWork Markdown Preview",
   "description": "MDWork Markdown preview with compact headings, Mermaid, GFM and image wrapping.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "mdwork",
   "private": true,
   "engines": {
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "node ../scripts/build-vscode.mjs",
-    "package": "vsce package --out ../release/MDWork-vscode-1.0.2.vsix"
+    "package": "vsce package --out ../release/MDWork-vscode-1.0.3.vsix"
   },
   "devDependencies": {
     "@vscode/vsce": "^4.1.0"

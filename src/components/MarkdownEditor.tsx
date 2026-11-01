@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { monaco } from '../editor/monaco';
 import { findInvisibleCharacters } from '../editor/invisibleCharacters';
+import { applyFormatEdit, type EditorFormatCommand } from '../editor/formatting';
 import type { AppSettings } from '../settings';
 
 interface MarkdownEditorBaseProps {
@@ -26,6 +27,7 @@ type MarkdownEditorProps = MarkdownEditorBaseProps & ({
 
 export interface MarkdownEditorHandle {
   insertText: (text: string) => void;
+  format: (command: EditorFormatCommand) => void;
   revealLine: (line: number) => void;
 }
 
@@ -46,6 +48,10 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
     showHiddenCharactersRef.current = settings.showHiddenCharacters;
 
     useImperativeHandle(forwardedRef, () => ({
+      format(command) {
+        const editor = editorRef.current;
+        if (editor) applyFormatEdit(editor, command);
+      },
       revealLine(line) {
         const editor = editorRef.current;
         const currentModel = editor?.getModel();
@@ -99,6 +105,18 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
         tabSize: 2,
       });
       editorRef.current = editor;
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB, () => {
+        applyFormatEdit(editor, { type: 'inline', format: 'bold' });
+      });
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
+        applyFormatEdit(editor, { type: 'inline', format: 'italic' });
+      });
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyU, () => {
+        applyFormatEdit(editor, { type: 'inline', format: 'underline' });
+      });
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyX, () => {
+        applyFormatEdit(editor, { type: 'inline', format: 'strikethrough' });
+      });
       documentIdRef.current = documentId ?? 'single-document';
       const hiddenDecorations = editor.createDecorationsCollection();
       let hiddenFrame: number | null = null;

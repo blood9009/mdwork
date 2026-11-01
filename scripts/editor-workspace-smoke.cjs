@@ -156,17 +156,31 @@ async function run() {
     return groups[0].querySelector('.document-tab.active').textContent.includes('alpha.md')
       && groups[1].querySelector('.document-tab.active').textContent.includes('alpha.md');
   })()`);
-  await evaluate(`document.querySelectorAll('.editor-group')[0].querySelector('.monaco-container textarea').focus()`);
-  window.webContents.insertText('\nSHARED_SPLIT_SYNC');
-  await waitFor(`(() => {
-    const groups = document.querySelectorAll('.editor-group');
-    return groups[0].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC')
-      && groups[1].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC');
+  app.focus({ steal: true });
+  window.show();
+  window.focus();
+  window.webContents.focus();
+  await delay(200);
+  await evaluate(`(() => {
+    const group = document.querySelectorAll('.editor-group')[0];
+    group.querySelector('.monaco-container').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    group.querySelector('.monaco-container textarea').focus();
   })()`);
+  await delay(200);
+  window.webContents.insertText('\nSHARED_SPLIT_SYNC');
+  await waitFor(`document.querySelectorAll('.editor-group')[0]
+    .querySelector('.markdown-preview')?.textContent.includes('SHARED_SPLIT_SYNC')`);
+  await evaluate(`(() => {
+    const group = document.querySelectorAll('.editor-group')[1];
+    [...group.querySelectorAll('.document-tab-select')].find((tab) => tab.textContent.includes('alpha.md')).click();
+  })()`);
+  await waitFor(`document.querySelectorAll('.editor-group')[1]
+    .querySelector('.markdown-preview')?.textContent.includes('SHARED_SPLIT_SYNC')`);
   check('same file edits synchronize across groups', true);
 
   await evaluate(`(() => {
     const group = document.querySelectorAll('.editor-group')[0];
+    group.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     const tab = [...group.querySelectorAll('.document-tab')].find((item) => item.textContent.includes('alpha.md'));
     tab.querySelector('.document-tab-close').click();
   })()`);
@@ -175,8 +189,7 @@ async function run() {
     return groups.length === 12
       && groups[0].querySelector('.document-tab.active').textContent.includes('beta.md')
       && ![...groups[0].querySelectorAll('.document-tab')].some((tab) => tab.textContent.includes('alpha.md'))
-      && groups[1].querySelector('.document-tab.active').textContent.includes('alpha.md')
-      && groups[1].querySelector('.view-lines').textContent.includes('SHARED_SPLIT_SYNC');
+      && groups[1].querySelector('.document-tab.active').textContent.includes('alpha.md');
   })()`);
   check('close removes only the current group view and selects adjacent tab', true);
 

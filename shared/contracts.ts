@@ -16,6 +16,33 @@ export interface ImageImportResult {
   alt?: string;
 }
 
+export type DocumentImportKind = 'word' | 'pdf';
+
+export interface ImportSourceResult {
+  canceled: boolean;
+  path?: string;
+  data?: ArrayBuffer;
+  size?: number;
+}
+
+export interface ImportedDocumentImage {
+  uri: string;
+  contentType: string;
+  data: ArrayBuffer | Uint8Array;
+}
+
+export interface SaveImportedDocumentRequest {
+  sourcePath: string;
+  markdown: string;
+  images: ImportedDocumentImage[];
+  warnings: string[];
+  openPaths: Array<string | null>;
+}
+
+export interface ImportedDocumentResult extends DocumentResult {
+  warnings?: string[];
+}
+
 export type PdfTheme = 'default' | 'clean' | 'academic' | 'technical';
 export type PdfPageSize = 'A4' | 'Letter';
 export type PdfOrientation = 'portrait' | 'landscape';
@@ -53,12 +80,33 @@ export interface PdfExportResult {
   path?: string;
 }
 
+export type ExportFormat = 'pdf' | 'docx';
+
+export interface DocxExportRequest {
+  title: string;
+  sourcePath: string | null;
+  data: ArrayBuffer | Uint8Array;
+}
+
+export interface ExportImageRequest {
+  documentPath: string;
+  source: string;
+}
+
+export interface ExportImageResult {
+  data: ArrayBuffer | Uint8Array;
+}
+
 export interface MdWorkApi {
   openDocument(): Promise<DocumentResult>;
   openDroppedDocument(file: File): Promise<DocumentResult>;
   saveDocument(path: string | null, content: string): Promise<SaveResult>;
   importImage(documentPath: string): Promise<ImageImportResult>;
+  selectImportSource(kind: DocumentImportKind): Promise<ImportSourceResult>;
+  saveImportedDocument(request: SaveImportedDocumentRequest): Promise<ImportedDocumentResult>;
   exportPdf(request: PdfExportRequest): Promise<PdfExportResult>;
+  exportDocx(request: DocxExportRequest): Promise<PdfExportResult>;
+  readExportImage(request: ExportImageRequest): Promise<ExportImageResult>;
   listSystemFonts(): Promise<string[]>;
   openExternal(url: string): Promise<void>;
   openLocalResource(documentPath: string, href: string): Promise<void>;

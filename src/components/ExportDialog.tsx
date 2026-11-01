@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
-import type { PdfOptions, PdfOrientation, PdfPageSize, PdfTheme } from '../../shared/contracts';
+import type { ExportFormat, PdfOptions, PdfOrientation, PdfPageSize, PdfTheme } from '../../shared/contracts';
 import type { AppSettings } from '../settings';
 
 interface ExportDialogProps {
   settings: AppSettings;
   exporting: boolean;
-  onExport: (options: PdfOptions) => Promise<boolean>;
+  initialFormat: ExportFormat;
+  onExport: (format: ExportFormat, options: PdfOptions) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -26,7 +27,8 @@ function initialOptions(settings: AppSettings): PdfOptions {
   };
 }
 
-export function ExportDialog({ settings, exporting, onExport, onClose }: ExportDialogProps) {
+export function ExportDialog({ settings, exporting, initialFormat, onExport, onClose }: ExportDialogProps) {
+  const [format, setFormat] = useState<ExportFormat>(initialFormat);
   const [options, setOptions] = useState(() => initialOptions(settings));
 
   useEffect(() => {
@@ -38,14 +40,21 @@ export function ExportDialog({ settings, exporting, onExport, onClose }: ExportD
   }
 
   return (
-    <Modal title="导出 PDF" onClose={onClose}>
+    <Modal title={`导出 ${format === 'docx' ? 'DOCX' : 'PDF'}`} onClose={onClose}>
       <form onSubmit={async (event) => {
         event.preventDefault();
-        if (await onExport(options)) onClose();
+        if (await onExport(format, options)) onClose();
       }}>
         <div className="modal-body settings-form">
+          <label>
+            <span>导出格式</span>
+            <select value={format} onChange={(event) => setFormat(event.target.value as ExportFormat)}>
+              <option value="pdf">PDF（固定页面排版）</option>
+              <option value="docx">DOCX（可用 Word/WPS 继续编辑）</option>
+            </select>
+          </label>
           <div className="form-row">
-            <label>
+            {format === 'pdf' && <label>
               <span>样式主题</span>
               <select value={options.theme} onChange={(event) => patch('theme', event.target.value as PdfTheme)}>
                 <option value="default">默认</option>
@@ -53,7 +62,7 @@ export function ExportDialog({ settings, exporting, onExport, onClose }: ExportD
                 <option value="academic">论文</option>
                 <option value="technical">技术文档</option>
               </select>
-            </label>
+            </label>}
             <label>
               <span>纸张大小</span>
               <select value={options.pageSize} onChange={(event) => patch('pageSize', event.target.value as PdfPageSize)}>
@@ -98,6 +107,9 @@ export function ExportDialog({ settings, exporting, onExport, onClose }: ExportD
             onChange={(event) => patch('showToc', event.target.checked)} />在正文前生成目录</label>
           <label className="check-label"><input type="checkbox" checked={options.printBackground}
             onChange={(event) => patch('printBackground', event.target.checked)} />保留代码块和表格背景色</label>
+          {format === 'docx' && <p className="form-hint">
+            保留标题、列表、表格、链接、代码、文字样式和可读取的图片；Mermaid 以静态图片嵌入。目录页码可在 Word/WPS 中更新。
+          </p>}
         </div>
         <footer className="modal-footer">
           <button type="button" onClick={onClose} disabled={exporting}>取消</button>

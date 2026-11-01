@@ -137,6 +137,7 @@ function cleanBodyHtml(html: string): string {
       '*': ['class', 'id', 'data-source-line'],
       a: ['href', 'name', 'title'],
       img: ['src', 'alt', 'title', 'width', 'height', 'style'],
+      span: ['style'],
       input: ['type', 'checked', 'disabled'],
       ol: ['start'],
     },
@@ -149,6 +150,11 @@ function cleanBodyHtml(html: string): string {
     allowedStyles: {
       img: {
         width: [/^(?:[1-9]\d?|100)%$/, /^(?:[1-9]\d{0,2}|1\d{3}|2000)px$/],
+      },
+      span: {
+        'font-family': [/^[\p{L}\p{N} _-]{1,120}$/u],
+        'font-size': [/^(?:[1-9]|[1-6]\d|7[0-2])(?:\.\d+)?pt$/],
+        color: [/^#[\da-fA-F]{6}$/],
       },
     },
   });
