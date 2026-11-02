@@ -6,6 +6,7 @@ import { saveImportedDocument, selectImportSource } from './document-import-serv
 import { listSystemFonts } from './font-service';
 import { exportDocx } from './docx-service';
 import { exportPdf } from './pdf-service';
+import { clearFolderSession, openFolder, openFolderDocument, refreshFolder } from './folder-service';
 import type { DocxExportRequest, DocumentImportKind, ExportImageRequest, PdfExportRequest, SaveImportedDocumentRequest } from '../shared/contracts';
 
 registerAssetScheme();
@@ -71,7 +72,10 @@ function createWindow(): void {
   } else {
     void mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
-  mainWindow.on('closed', () => { mainWindow = null; });
+  mainWindow.on('closed', () => {
+    clearFolderSession(window);
+    mainWindow = null;
+  });
 }
 
 app.whenReady().then(() => {
@@ -89,12 +93,26 @@ app.whenReady().then(() => {
     if (typeof filePath !== 'string' || !filePath) throw new Error('未识别到拖入的文件');
     return openDroppedDocument(filePath);
   });
-  ipcMain.handle('document:save', (_event, filePath: string | null, content: string) => {
+  ipcMain.handle('folder:open', (event) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    return openFolder(mainWindow);
+  });
+  ipcMain.handle('folder:refresh', (event) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    return refreshFolder(mainWindow);
+  });
+  ipcMain.handle('folder:open-document', (event, filePath: string) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');
+    if (typeof filePath !== 'string' || !filePath || filePath.length > 4096) throw new Error('无效的文件路径');
+    return openFolderDocument(mainWindow, filePath);
+  });
+  ipcMain.handle('document:save', (_event, filePath: string | null, content: string, saveAs = false) => {
     if (!mainWindow) throw new Error('主窗口不可用');
-    if (typeof content !== 'string' || (filePath !== null && typeof filePath !== 'string')) {
+    if (typeof content !== 'string' || (filePath !== null && typeof filePath !== 'string')
+      || typeof saveAs !== 'boolean') {
       throw new Error('无效的文档保存参数');
     }
-    return saveDocument(mainWindow, filePath, content);
+    return saveDocument(mainWindow, filePath, content, saveAs);
   });
   ipcMain.handle('document:import-image', (event, documentPath: string) => {
     if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('主窗口不可用');

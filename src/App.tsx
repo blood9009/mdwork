@@ -7,6 +7,8 @@ import { SettingsDialog } from './components/SettingsDialog';
 import { ExportDialog } from './components/ExportDialog';
 import { FormattingToolbar } from './components/FormattingToolbar';
 import { InsertUrlDialog } from './components/InsertUrlDialog';
+import { PdfImportDialog } from './components/PdfImportDialog';
+import { FileExplorer } from './components/FileExplorer';
 import { sanitizeMarkdown } from './markdown/sanitizeMarkdown';
 import { renderMermaidDiagrams } from './markdown/renderMermaidDiagrams';
 import { renderMarkdownInWorker } from './markdown/previewWorkerClient';
@@ -21,7 +23,8 @@ import {
   workspaceReducer,
   type WorkspaceDocument,
 } from './workspace/workspace';
-import type { DocumentImportKind, DocumentResult, ExportFormat, PdfOptions } from '../shared/contracts';
+import type { DocumentImportKind, DocumentResult, ExportFormat, FolderSnapshot, PdfOptions } from '../shared/contracts';
+import type { PdfConversionResult } from './import/pdfToMarkdown';
 
 const welcomeDocument = `# 欢迎使用 MDWork
 
@@ -89,6 +92,12 @@ function createDocumentId(): string {
   return globalThis.crypto.randomUUID();
 }
 
+interface PdfImportSelection {
+  sourcePath: string;
+  data: ArrayBuffer;
+  targetGroupId: string;
+}
+
 export default function App() {
   const modelsRef = useRef<DocumentModelRegistry | null>(null);
   if (!modelsRef.current) modelsRef.current = new DocumentModelRegistry();
@@ -111,6 +120,10 @@ export default function App() {
   const [urlDialogOpen, setUrlDialogOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState<DocumentImportKind | null>(null);
+  const [pdfImport, setPdfImport] = useState<PdfImportSelection | null>(null);
+  const [folder, setFolder] = useState<FolderSnapshot | null>(null);
+  const [explorerVisible, setExplorerVisible] = useState(true);
+  const [folderBusy, setFolderBusy] = useState(false);
   const [status, setStatus] = useState('就绪');
   const [dragActive, setDragActive] = useState(false);
   const editorRefs = useRef(new Map<string, MarkdownEditorHandle>());
@@ -122,6 +135,7 @@ export default function App() {
 
   const currentDocument = getActiveDocument(workspace);
   const documents = useMemo(() => workspace.documentOrder.map((id) => workspace.documents[id]), [workspace.documentOrder, workspace.documents]);
+  const openPaths = useMemo(() => new Set(documents.flatMap((document) => document.path ? [document.path] : [])), [documents]);
   const anyDirty = documents.some((document) => document.dirty);
   const gridSize = editorGridSize(workspace);
 
@@ -167,6 +181,46 @@ export default function App() {
     }
   }, [acceptOpenedDocument, notify]);
 
+  const handleOpenFolder = useCallback(async () => {
+    setFolderBusy(true);
+    try {
+      setStatus('正在选择并读取文件夹…');
+      const snapshot = await window.mdwork.openFolder();
+      if (snapshot.canceled) { setStatus('就绪'); return; }
+      setFolder(snapshot);
+      setExplorerVisible(true);
+      const count = snapshot.entries.filter((entry) => entry.kind === 'file').length;
+      notify(`已打开文件夹：${snapshot.rootName}（${count} 个文件）`);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : '打开文件夹失败');
+    } finally {
+      setFolderBusy(false);
+    }
+  }, [notify]);
+
+  const handleRefreshFolder = useCallback(async () => {
+    setFolderBusy(true);
+    try {
+      const snapshot = await window.mdwork.refreshFolder();
+      setFolder(snapshot);
+      notify(`文件列表已刷新：${snapshot.rootName}`);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : '刷新文件列表失败');
+    } finally {
+      setFolderBusy(false);
+    }
+  }, [notify]);
+
+  const handleOpenFolderFile = useCallback(async (filePath: string) => {
+    try {
+      setStatus('正在打开文件…');
+      const result = await window.mdwork.openFolderDocument(filePath);
+      if (!acceptOpenedDocument(result)) setStatus('就绪');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : '打开文件失败');
+    }
+  }, [acceptOpenedDocument, notify]);
+
   const handleImportDocument = useCallback(async (kind: DocumentImportKind, groupId?: string) => {
     const targetGroupId = groupId ?? workspaceRef.current.activeGroupId;
     const label = kind === 'word' ? 'Word' : 'PDF';
@@ -176,11 +230,13 @@ export default function App() {
       const source = await window.mdwork.selectImportSource(kind);
       if (source.canceled) { notify(`已取消 ${label} 导入`); return; }
       if (!source.path || !source.data) throw new Error('未读取到导入文件内容');
-      const converted = kind === 'word'
-        ? await import('./import/wordToMarkdown').then(({ convertWordToMarkdown }) => convertWordToMarkdown(source.data!))
-        : await import('./import/pdfToMarkdown').then(async ({ convertPdfToMarkdown }) => ({
-          markdown: await convertPdfToMarkdown(source.data!), images: [], warnings: [],
-        }));
+      if (kind === 'pdf') {
+        setPdfImport({ sourcePath: source.path, data: source.data, targetGroupId });
+        setStatus('请选择 PDF 导入方式并核对预览');
+        return;
+      }
+      const converted = await import('./import/wordToMarkdown')
+        .then(({ convertWordToMarkdown }) => convertWordToMarkdown(source.data!));
       const result = await window.mdwork.saveImportedDocument({
         sourcePath: source.path,
         markdown: converted.markdown,
@@ -200,13 +256,36 @@ export default function App() {
     }
   }, [acceptOpenedDocument, notify]);
 
+  const handlePdfImportConfirm = useCallback(async (converted: PdfConversionResult): Promise<boolean> => {
+    if (!pdfImport) return false;
+    try {
+      setStatus('正在保存导入的 Markdown 和图片…');
+      const result = await window.mdwork.saveImportedDocument({
+        sourcePath: pdfImport.sourcePath,
+        markdown: converted.markdown,
+        images: converted.images,
+        warnings: converted.warnings,
+        openPaths: Object.values(workspaceRef.current.documents).map((document) => document.path),
+      });
+      if (result.canceled) { notify('已取消 PDF 导入'); return false; }
+      const documentId = acceptOpenedDocument(result, pdfImport.targetGroupId);
+      if (!documentId) throw new Error('转换结果未能打开');
+      const warning = result.warnings?.length ? `（${result.warnings.length} 条格式提示）` : '';
+      notify(`已导入 PDF：${result.path?.split(/[\\/]/).pop()}${warning}`);
+      return true;
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'PDF 导入失败');
+      return false;
+    }
+  }, [acceptOpenedDocument, notify, pdfImport]);
+
   const performSave = useCallback(async (documentId: string, saveAs: boolean, silent: boolean): Promise<string | null> => {
     try {
       const document = workspaceRef.current.documents[documentId];
       if (!document) return null;
       const snapshot = models.snapshot(documentId);
       if (!silent) setStatus('正在保存…');
-      const result = await window.mdwork.saveDocument(saveAs ? null : document.path, snapshot.content);
+      const result = await window.mdwork.saveDocument(document.path, snapshot.content, saveAs);
       if (result.canceled || !result.path) return null;
       const conflicting = Object.values(workspaceRef.current.documents)
         .find((item) => item.id !== documentId && item.path === result.path);
@@ -402,7 +481,7 @@ export default function App() {
         notify(`DOCX 已导出：${result.path}${converted.warnings.length ? `（${converted.warnings.length} 条格式提示）` : ''}`);
         return true;
       }
-      const result = await window.mdwork.exportPdf({ title, sourcePath: path, bodyHtml, headings: current.headings, options });
+      const result = await window.mdwork.exportPdf({ title, sourcePath: path, sourceMarkdown: snapshot, bodyHtml, headings: current.headings, options });
       if (result.canceled) return false;
       notify(`PDF 已导出：${result.path}`);
       return true;
@@ -423,6 +502,9 @@ export default function App() {
       } else if (event.key.toLowerCase() === 'o') {
         event.preventDefault();
         void handleOpen();
+      } else if (event.key.toLowerCase() === 'e' && event.shiftKey) {
+        event.preventDefault();
+        setExplorerVisible((visible) => !visible);
       } else if (event.key.toLowerCase() === 'w') {
         event.preventDefault();
         const state = workspaceRef.current;
@@ -448,7 +530,7 @@ export default function App() {
             {importing === 'word' ? '导入中…' : '导入 Word'}
           </button>
           <button onClick={() => void handleImportDocument('pdf')} disabled={importing !== null}
-            title="提取 PDF 文字层并本地转换为 Markdown；扫描件需先 OCR">
+            title="本地预览并转换 PDF：可编辑、保留版式或混合模式">
             {importing === 'pdf' ? '导入中…' : '导入 PDF'}
           </button>
           <button onClick={() => saveActiveDocument()} disabled={!currentDocument}
@@ -504,32 +586,48 @@ export default function App() {
           editor.format(command);
         }} />
 
-      <main className="workspace">
-        <div className="editor-grid" style={{
-          gridTemplateColumns: `repeat(${gridSize.columns}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${gridSize.rows}, minmax(0, 1fr))`,
-        }}>
-          {workspace.groupOrder.map((groupId) => {
-            const group = workspace.groups[groupId];
-            const document = group.activeDocumentId ? workspace.documents[group.activeDocumentId] ?? null : null;
-            const groupDocuments = group.documentIds.map((id) => workspace.documents[id]);
-            return <WorkspaceGroup key={groupId} groupId={groupId} active={workspace.activeGroupId === groupId}
-              documents={groupDocuments} document={document} model={document ? models.get(document.id) : null}
-              settings={settings} viewMode={viewMode}
-              editorRef={(handle) => { if (handle) editorRefs.current.set(groupId, handle); else editorRefs.current.delete(groupId); }}
-              previewRef={(handle) => { if (handle) previewRefs.current.set(groupId, handle); else previewRefs.current.delete(groupId); }}
-              onActivate={() => dispatch({ type: 'activate-group', groupId })}
-              onSelectDocument={(documentId) => dispatch({ type: 'select-document', groupId, documentId })}
-              onCloseDocument={(documentId) => closeDocument(groupId, documentId)}
-              onNew={() => handleNew(groupId)} onOpen={() => void handleOpen(groupId)}
-              onVisibleLineChange={(line) => {
-                if (settings.syncScroll && viewMode === 'split') previewRefs.current.get(groupId)?.scrollToSourceLine(line);
-              }}
-              onNavigateLine={(line) => editorRefs.current.get(groupId)?.revealLine(line)}
-              onNotify={notify} />;
-          })}
-        </div>
-      </main>
+      <div className="workspace-body">
+        <nav className="activity-bar" aria-label="侧栏功能">
+          <button type="button" className={`activity-button ${explorerVisible ? 'active' : ''}`}
+            title="文件列表（Cmd/Ctrl+Shift+E）" aria-label="显示或隐藏文件列表"
+            aria-expanded={explorerVisible} onClick={() => setExplorerVisible((visible) => !visible)}>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <path d="M4 3.5h9v17H4zM15 7.5h5v13h-5M7 8h3M7 12h3M7 16h3" />
+            </svg>
+          </button>
+        </nav>
+        {explorerVisible && <FileExplorer snapshot={folder} busy={folderBusy}
+          activePath={currentDocument?.path ?? null} openPaths={openPaths}
+          onOpenFolder={() => void handleOpenFolder()}
+          onRefresh={() => void handleRefreshFolder()}
+          onOpenFile={(filePath) => void handleOpenFolderFile(filePath)} />}
+        <main className="workspace">
+          <div className="editor-grid" style={{
+            gridTemplateColumns: `repeat(${gridSize.columns}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${gridSize.rows}, minmax(0, 1fr))`,
+          }}>
+            {workspace.groupOrder.map((groupId) => {
+              const group = workspace.groups[groupId];
+              const document = group.activeDocumentId ? workspace.documents[group.activeDocumentId] ?? null : null;
+              const groupDocuments = group.documentIds.map((id) => workspace.documents[id]);
+              return <WorkspaceGroup key={groupId} groupId={groupId} active={workspace.activeGroupId === groupId}
+                documents={groupDocuments} document={document} model={document ? models.get(document.id) : null}
+                settings={settings} viewMode={viewMode}
+                editorRef={(handle) => { if (handle) editorRefs.current.set(groupId, handle); else editorRefs.current.delete(groupId); }}
+                previewRef={(handle) => { if (handle) previewRefs.current.set(groupId, handle); else previewRefs.current.delete(groupId); }}
+                onActivate={() => dispatch({ type: 'activate-group', groupId })}
+                onSelectDocument={(documentId) => dispatch({ type: 'select-document', groupId, documentId })}
+                onCloseDocument={(documentId) => closeDocument(groupId, documentId)}
+                onNew={() => handleNew(groupId)} onOpen={() => void handleOpen(groupId)}
+                onVisibleLineChange={(line) => {
+                  if (settings.syncScroll && viewMode === 'split') previewRefs.current.get(groupId)?.scrollToSourceLine(line);
+                }}
+                onNavigateLine={(line) => editorRefs.current.get(groupId)?.revealLine(line)}
+                onNotify={notify} />;
+            })}
+          </div>
+        </main>
+      </div>
 
       {dragActive && <div className="drop-overlay" aria-hidden="true">
         <div>释放以在新标签中打开 Markdown 文件</div>
@@ -546,6 +644,8 @@ export default function App() {
 
       {settingsOpen && <SettingsDialog settings={settings} fonts={fonts}
         onChange={setSettings} onClose={() => setSettingsOpen(false)} />}
+      {pdfImport && <PdfImportDialog sourcePath={pdfImport.sourcePath} data={pdfImport.data}
+        onConfirm={handlePdfImportConfirm} onClose={() => setPdfImport(null)} />}
       {urlDialogOpen && <InsertUrlDialog onClose={() => setUrlDialogOpen(false)}
         onInsert={(resource) => {
           insertResource(resource);

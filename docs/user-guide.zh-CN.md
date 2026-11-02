@@ -33,17 +33,17 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 以下链接对应项目 `release` 目录内的构建产物。直接打开源码仓库而未执行构建时，二进制文件可能尚未生成。
 
-- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0.3-macos-universal.dmg](../release/MDWork-1.0.0.3-macos-universal.dmg)
-- macOS Apple Silicon（arm64）：[MDWork-1.0.0.3-macos-arm64.dmg](../release/MDWork-1.0.0.3-macos-arm64.dmg)
-- Windows x64 便携版：[MDWork-1.0.0.3-win.zip](../release/MDWork-1.0.0.3-win.zip)
-- VS Code：[MDWork-vscode-1.0.0.3.vsix](../release/MDWork-vscode-1.0.0.3.vsix)
+- macOS 通用版（Apple Silicon + Intel）：[MDWork-1.0.0.4-macos-universal.dmg](../release/MDWork-1.0.0.4-macos-universal.dmg)
+- macOS Apple Silicon（arm64）：[MDWork-1.0.0.4-macos-arm64.dmg](../release/MDWork-1.0.0.4-macos-arm64.dmg)
+- Windows x64 便携版：[MDWork-1.0.0.4-win.zip](../release/MDWork-1.0.0.4-win.zip)
+- VS Code：[MDWork-vscode-1.0.0.4.vsix](../release/MDWork-vscode-1.0.0.4.vsix)
 - 校验值：[SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS 安装
 
 通用 DMG 同时包含 arm64 和 x86_64 架构，适用于 Apple Silicon（M 系列芯片）和 Intel Mac。另有仅含 arm64 的独立包；不确定芯片类型时选择通用版即可。
 
-1. 下载并双击 `MDWork-1.0.0.3-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0.3-macos-arm64.dmg`。
+1. 下载并双击 `MDWork-1.0.0.4-macos-universal.dmg`。Apple Silicon 用户也可以选择较小的 `MDWork-1.0.0.4-macos-arm64.dmg`。
 2. 在打开的窗口中将 **MDWork.app** 拖入 **Applications（应用程序）**。
 3. 推出 DMG 磁盘映像。
 4. 从“应用程序”或 Launchpad 启动 MDWork。
@@ -54,7 +54,7 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 
 当前交付物是 Windows x64 **便携版 ZIP**，不是 Setup EXE 安装程序，也不需要安装到系统目录。
 
-1. 下载 `MDWork-1.0.0.3-win.zip`，并核对 SHA-256 校验值。
+1. 下载 `MDWork-1.0.0.4-win.zip`，并核对 SHA-256 校验值。
 2. 在文件资源管理器中右键 ZIP，选择“全部解压缩”，解压到自己有读写权限的目录；不要直接在压缩包预览中运行。
 3. 打开解压后的文件夹，双击 **MDWork.exe** 启动。
 4. 便携版不会自动创建开始菜单项或卸载程序。可为 `MDWork.exe` 自行创建快捷方式；退出应用后删除整个解压文件夹即可移除。
@@ -68,14 +68,14 @@ Markdown 主解析器由 MDWork 自研，包含块级解析、行内解析、AST
 1. 打开 VS Code 的“扩展”视图。
 2. 点击扩展视图右上角的 `…`。
 3. 选择 **Install from VSIX… / 从 VSIX 安装…**。
-4. 选择 `MDWork-vscode-1.0.0.3.vsix` 并按提示重新加载。
+4. 选择 `MDWork-vscode-1.0.0.4.vsix` 并按提示重新加载。
 5. 打开一个 Markdown 文件。
 6. 按 `Cmd/Ctrl + Shift + P`，执行 **MDWork: Open Preview**。
 
 **命令行：**
 
 ```bash
-code --install-extension /完整路径/MDWork-vscode-1.0.0.3.vsix
+code --install-extension /完整路径/MDWork-vscode-1.0.0.4.vsix
 ```
 
 若终端提示找不到 `code`，在 VS Code 命令面板执行 **Shell Command: Install 'code' command in PATH**，或改用图形界面安装。
@@ -88,7 +88,7 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.3.vsix
 - **打开**：通过系统文件选择框打开文档并新增标签；重复打开同一路径会定位已有标签。
 - **保存 / 另存为**：保存活动分栏中的当前文档；未命名文档会要求选择位置。
 - **导入 Word**：将本地 `.docx` 转换为新 Markdown，可保留标题、常见格式、列表、表格、链接和图片。
-- **导入 PDF**：提取本地 PDF 的文字层并转换为新 Markdown；扫描版需先 OCR。
+- **导入 PDF**：预览并选择可编辑 Markdown、保留原版式或混合模式，将本地 PDF 转换为新 Markdown。
 - **导入图片**：选择本地图片，复制到当前文档旁的 `assets` 并插入 Markdown。
 - **插入 URL**：插入网络图片或仅插入链接。
 - **导出 PDF**：导出活动分栏中的当前文档，生成固定分页排版。
@@ -108,7 +108,18 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.3.vsix
 
 字体、字号和颜色以 `<span style="…">` 行内 HTML 写入 Markdown，只允许字体家族、1–72 pt 字号和 `#RRGGBB` 颜色，不开放任意 CSS。它们会同步应用到预览、PDF 和 DOCX；需要保持纯 Markdown 时可改用粗体、列表等标准语法。
 
-### 3.2 标签、编辑分栏和状态栏
+### 3.2 文件资源管理器
+
+左侧活动栏的“文件”按钮用于显示或隐藏资源管理器，也可使用 `Cmd/Ctrl + Shift + E`。点击“打开文件夹”并授权一个本地文件夹后，MDWork 会递归扫描并自动列出 `.md`、`.markdown`、`.mdown`、`.mkd`、`.txt` 文件。
+
+- 点击目录可展开或收起；点击文件会在当前分栏打开标签。可同时打开多个文件，重复点击已打开文件只会定位原标签，不会重复创建。
+- 当前活动文件会高亮，文件名右侧的蓝点表示该文件已经打开。顶栏“＋”可改选其他文件夹，“↻”可重新扫描当前文件夹。
+- 扫描会跳过 `.git`、`node_modules` 和符号链接；目录与文件合计最多列出 2000 项，达到上限时会提示“列表已截断”。
+- 外部程序新增、删除或重命名文件后，需要点击“刷新文件列表”更新；当前版本没有后台文件监视器。PDF、Word、图片等其他文件请继续使用对应的导入功能，不会出现在此列表中。
+
+只能读取当前窗口已授权文件夹内的文档，目录越界和符号链接路径会被拒绝。
+
+### 3.3 标签、编辑分栏和状态栏
 
 - 每个已打开文档都有全局唯一标签；同一文档也可在多个分栏中查看，但内容和未保存状态共享。
 - 每个分栏独立选择活动标签。点击编辑区或标签会激活该分栏，保存、格式工具、图片插入和 PDF/DOCX 导出均针对活动分栏的文档。
@@ -118,13 +129,14 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.3.vsix
 - 普通文档在活动分栏编辑后自动同步预览；预览顶部的“刷新预览”按钮可随时重新读取当前编辑器内容。其他分栏显示“激活此分栏后更新预览”，避免多个大文档同时解析。
 - 状态栏显示活动文档路径、未保存状态、操作消息、字符数和行数；标签上的 `●` 表示该文档有未保存修改。
 
-### 3.3 快捷键
+### 3.4 快捷键
 
 | 操作 | macOS | Windows |
 | --- | --- | --- |
 | 保存 | `Cmd + S` | `Ctrl + S` |
 | 另存为 | `Cmd + Shift + S` | `Ctrl + Shift + S` |
 | 打开 | `Cmd + O` | `Ctrl + O` |
+| 显示 / 隐藏文件列表 | `Cmd + Shift + E` | `Ctrl + Shift + E` |
 | 关闭活动文档 | `Cmd + W` | `Ctrl + W` |
 | 粗体 | `Cmd + B` | `Ctrl + B` |
 | 斜体 | `Cmd + I` | `Ctrl + I` |
@@ -134,7 +146,7 @@ code --install-extension /完整路径/MDWork-vscode-1.0.0.3.vsix
 
 Monaco 的撤销、重做、查找、替换、多光标等快捷键遵循编辑器及操作系统习惯。
 
-### 3.4 支持的文档和拖放
+### 3.5 支持的文档和拖放
 
 桌面版支持 `.md`、`.markdown`、`.mdown`、`.mkd`、`.txt`，按 UTF-8 读写。
 
@@ -144,9 +156,9 @@ Monaco 的撤销、重做、查找、替换、多光标等快捷键遵循编辑�
 
 大文件仍按完整 UTF-8 文件读取并载入一个 Monaco model，不是无限大文件或分块加载。编辑过程不为每次按键复制全文，Markdown 解析交给 Web Worker。达到 1,000,000 字符时默认关闭自动换行并暂停实时预览；点击“刷新预览”可手动解析当前版本，保存和 PDF/DOCX 导出始终读取当前文档快照。
 
-### 3.5 导入 Word 或 PDF
+### 3.6 导入 Word 或 PDF
 
-Word/PDF 导入采用“选择源文件 → 选择 Markdown 保存位置 → 转换并打开新标签”的流程。所有解析都在本机完成，不上传文件，不覆盖或修改原 Word/PDF。取消任一选择框不会生成新文档。
+所有解析都在本机完成，不上传文件，不覆盖或修改原 Word/PDF。Word 采用“选择源文件 → 选择 Markdown 保存位置 → 转换并打开新标签”的流程；PDF 会先显示转换预览，再确认保存。取消选择框或预览对话框不会生成新文档。
 
 **Word：**
 
@@ -157,10 +169,15 @@ Word/PDF 导入采用“选择源文件 → 选择 Markdown 保存位置 → 转
 
 **PDF：**
 
-1. 点击“导入 PDF”，选择具有文字层的 `.pdf`。
-2. 选择新 Markdown 的保存位置。转换器根据文本坐标和字号识别常见 1–3 级标题、项目符号和数字列表，合并普通段落换行及英文断词。
-3. PDF 导入以文字内容为主，不保证复刻原页面布局。多栏页面、复杂表格、页眉页脚和特殊阅读顺序需要转换后校对。
-4. 扫描版或纯图片 PDF 没有文字层时会明确提示先 OCR，不会生成空白或猜测内容；受密码保护的 PDF 需先解除密码保护。
+1. 点击“导入 PDF”并选择 `.pdf`。在预览对话框中选择一种方式：
+   - **可编辑 Markdown**：提取文字层、简单表格和可解码的内嵌图片，便于继续修改。
+   - **保留原版式**：把每页渲染为高清 PNG，完整保留视觉版式，但文字不能直接编辑。
+   - **混合模式**：保留可提取的正文，对含矢量图形、复杂结构或没有文字的页面附整页原始版式图片。当前回退单位是整页，不会只裁切复杂区域。
+2. 核对原 PDF 首页、Markdown 预览、页数、字符数、图片数和格式警告，再点击“选择位置并导入”。生成的页面图和内嵌图片保存到目标 Markdown 旁的 `assets`，重名文件不会被覆盖。
+3. 可编辑和混合模式会按文本坐标、字号分析常见 1–3 级标题、项目符号、数字列表、多栏阅读顺序及具有明确对齐结构的简单表格，并合并普通段落换行和英文断词。复杂表格、特殊阅读顺序及图片原始位置仍需人工校对；单独提取的图片按所属页面附在文字后。
+4. 默认移除顶部或底部跨页重复的页眉、页脚和页码；取消对应复选框可保留。页眉页脚分析在全部页面读取后执行，因此混合模式会在清理后再判断页面是否仍有正文。
+5. 当前不会自动执行 OCR。可编辑模式遇到没有文字层的扫描件会明确提示，不会生成空白或猜测内容；需要保留扫描页面时可改用版式或混合模式。受密码保护的 PDF 需先解除密码保护。
+6. MDWork 自己导出的 PDF 含有 `mdwork-source.md` 附件。在可编辑或混合模式下导入时，优先逐字恢复导出时的 Markdown，不再推测排版；选择“保留原版式”仍生成整页图片。附件不包含外部图片，恢复后的相对图片路径以新 Markdown 所在目录为基准，必要时应同时复制原 `assets`。
 
 如果目标 Markdown 已在编辑器中打开，导入会停止并要求另选路径，避免覆盖当前编辑内容。转换完成后的新 Markdown 是普通可编辑文档，可继续使用保存、预览和 PDF 导出功能。
 
@@ -491,6 +508,8 @@ Mermaid 11.17.2 使用严格安全模式和纯静态 SVG，不支持点击事件
 5. 应用等待字体、图片和 Mermaid 资源处理后，通过 Electron `printToPDF` 生成独立分页 PDF。
 
 PDF 不是编辑器截图，不包含工具栏或左右分栏。标题会尽量避免孤立在页尾；长表格重复表头；代码可换行。图片环绕、`::clear`、紧凑编号、目录和链接样式会应用到 PDF。浮动元素跨页效果受 Chromium 分页布局影响，重要出版文档应在导出后逐页检查。
+
+桌面版同时把导出时的 Markdown 源文以 `mdwork-source.md` 附件嵌入 PDF。之后用 MDWork 的可编辑或混合模式导入该 PDF，可以逐字恢复源文，而不必从页面文字反推格式。外部图片和其他本地资源不会随源文附件打包，移动或分享后仍需保留相应 `assets` 及相对目录结构。
 
 ### 6.2 DOCX
 

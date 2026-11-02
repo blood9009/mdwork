@@ -33,17 +33,17 @@ MDWork uses its own block parser, inline parser, AST and HTML renderer. `markdow
 
 These links point to build artifacts in the project `release` directory. A source-only checkout does not contain binaries until they are built.
 
-- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.3-macos-universal.dmg](../release/MDWork-1.0.0.3-macos-universal.dmg)
-- macOS Apple Silicon (arm64): [MDWork-1.0.0.3-macos-arm64.dmg](../release/MDWork-1.0.0.3-macos-arm64.dmg)
-- Windows x64 portable: [MDWork-1.0.0.3-win.zip](../release/MDWork-1.0.0.3-win.zip)
-- VS Code: [MDWork-vscode-1.0.0.3.vsix](../release/MDWork-vscode-1.0.0.3.vsix)
+- macOS Universal (Apple Silicon + Intel): [MDWork-1.0.0.4-macos-universal.dmg](../release/MDWork-1.0.0.4-macos-universal.dmg)
+- macOS Apple Silicon (arm64): [MDWork-1.0.0.4-macos-arm64.dmg](../release/MDWork-1.0.0.4-macos-arm64.dmg)
+- Windows x64 portable: [MDWork-1.0.0.4-win.zip](../release/MDWork-1.0.0.4-win.zip)
+- VS Code: [MDWork-vscode-1.0.0.4.vsix](../release/MDWork-vscode-1.0.0.4.vsix)
 - Checksums: [SHA256SUMS.txt](../release/SHA256SUMS.txt)
 
 ### 2.1 macOS
 
 The Universal DMG contains both arm64 and x86_64 architectures and supports Apple Silicon (M-series) and Intel Macs. A separate arm64-only build is also available. If you are unsure which chip your Mac uses, choose the Universal build.
 
-1. Download and open `MDWork-1.0.0.3-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.3-macos-arm64.dmg`.
+1. Download and open `MDWork-1.0.0.4-macos-universal.dmg`. Apple Silicon users can alternatively choose the smaller `MDWork-1.0.0.4-macos-arm64.dmg`.
 2. Drag **MDWork.app** into **Applications**.
 3. Eject the disk image.
 4. Launch MDWork from Applications or Launchpad.
@@ -54,7 +54,7 @@ The Universal DMG contains both arm64 and x86_64 architectures and supports Appl
 
 The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE installer. It does not require installation into a system directory.
 
-1. Download `MDWork-1.0.0.3-win.zip` and verify its SHA-256 checksum.
+1. Download `MDWork-1.0.0.4-win.zip` and verify its SHA-256 checksum.
 2. In File Explorer, right-click the ZIP and choose **Extract All**. Extract it to a directory where you have read/write access; do not run the app from inside the ZIP preview.
 3. Open the extracted folder and double-click **MDWork.exe**.
 4. The portable build does not create Start-menu entries or an uninstaller. Create a shortcut to `MDWork.exe` if needed. To remove it, quit MDWork and delete the entire extracted folder.
@@ -68,14 +68,14 @@ The current Windows x64 deliverable is a **portable ZIP**, not a Setup EXE insta
 1. Open the Extensions view.
 2. Select the `…` menu in the Extensions view.
 3. Choose **Install from VSIX…**.
-4. Select `MDWork-vscode-1.0.0.3.vsix` and reload if prompted.
+4. Select `MDWork-vscode-1.0.0.4.vsix` and reload if prompted.
 5. Open a Markdown file.
 6. Press `Cmd/Ctrl + Shift + P` and run **MDWork: Open Preview**.
 
 **Command line:**
 
 ```bash
-code --install-extension /absolute/path/MDWork-vscode-1.0.0.3.vsix
+code --install-extension /absolute/path/MDWork-vscode-1.0.0.4.vsix
 ```
 
 If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** from the VS Code Command Palette, or use the GUI method.
@@ -88,7 +88,7 @@ If `code` is unavailable, run **Shell Command: Install 'code' command in PATH** 
 - **Open**: opens a document in a new tab; opening the same path again focuses its existing tab.
 - **Save / Save As**: saves the active group's current document, asking for a location if it is untitled.
 - **Import Word**: converts a local `.docx` file into a new Markdown document, preserving recognizable headings, common formatting, lists, tables, links and images.
-- **Import PDF**: extracts the text layer of a local PDF into a new Markdown document; scanned files require OCR first.
+- **Import PDF**: previews a local PDF and converts it into a new Markdown document using editable, original-layout or hybrid mode.
 - **Import image**: copies a selected local image into `assets` beside the document and inserts Markdown.
 - **Insert URL**: inserts either an embedded remote image or a link.
 - **Export PDF**: exports the active group's document with fixed page layout.
@@ -110,7 +110,18 @@ Font, size and color are stored as `<span style="…">` inline HTML. Only a font
 
 The current Chinese desktop labels are 新建、打开、导入 Word、导入 PDF、保存、另存为、导入图片、插入 URL、导出 PDF、导出 DOCX、编辑、分栏、预览、¶ 隐藏字符、向右分栏、向下分栏、单栏.
 
-### 3.2 Tabs, editor groups and status bar
+### 3.2 File Explorer
+
+Use the **Files** button in the left activity bar, or `Cmd/Ctrl + Shift + E`, to show or hide the Explorer. Choose **Open folder** and authorize a local folder to recursively list `.md`, `.markdown`, `.mdown`, `.mkd` and `.txt` documents automatically.
+
+- Click a directory to expand or collapse it. Click a file to open its tab in the current editor group. Multiple files can remain open; clicking an already-open file focuses its existing tab rather than creating a duplicate.
+- The active file is highlighted, and a blue dot marks an open file. Use **+** to choose another folder and **↻** to rescan the current folder.
+- Scanning skips `.git`, `node_modules` and symbolic links. At most 2000 directory and file entries are listed; the footer reports when this limit truncates the result.
+- After another program adds, removes or renames files, choose **Refresh file list**. This version does not run a background file watcher. PDF, Word, image and other files are not listed; use their corresponding import features instead.
+
+Only documents inside the folder authorized for the current window can be read. Paths outside that folder and symbolic links are rejected.
+
+### 3.3 Tabs, editor groups and status bar
 
 - Every open document has one global identity. It can appear in multiple groups while sharing content and dirty state.
 - Each group independently selects its active tab. Save, formatting commands, resource insertion and PDF/DOCX export apply to the active group's document.
@@ -120,13 +131,14 @@ The current Chinese desktop labels are 新建、打开、导入 Word、导入 PD
 - Normal documents synchronize the active group's preview after editing. The **Refresh preview** button above every preview rereads the current editor content on demand. Other groups wait until activated to avoid parsing multiple large documents at once.
 - The status bar shows the active document path, unsaved state, operation messages, character count and line count. A `●` on a tab means that document has unsaved changes.
 
-### 3.3 Shortcuts
+### 3.4 Shortcuts
 
 | Action | macOS | Windows |
 | --- | --- | --- |
 | Save | `Cmd + S` | `Ctrl + S` |
 | Save As | `Cmd + Shift + S` | `Ctrl + Shift + S` |
 | Open | `Cmd + O` | `Ctrl + O` |
+| Show / hide File Explorer | `Cmd + Shift + E` | `Ctrl + Shift + E` |
 | Close active document | `Cmd + W` | `Ctrl + W` |
 | Bold | `Cmd + B` | `Ctrl + B` |
 | Italic | `Cmd + I` | `Ctrl + I` |
@@ -136,7 +148,7 @@ The current Chinese desktop labels are 新建、打开、导入 Word、导入 PD
 
 Undo, redo, find, replace and multi-cursor shortcuts follow Monaco and platform conventions.
 
-### 3.4 Document formats and drag-and-drop
+### 3.5 Document formats and drag-and-drop
 
 The desktop app reads and writes UTF-8 `.md`, `.markdown`, `.mdown`, `.mkd` and `.txt` files.
 
@@ -146,9 +158,9 @@ Saving uses a temporary file followed by replacement. Each document has independ
 
 Large files are still read completely as UTF-8 into one Monaco model; this is not chunked loading or unlimited-file support. Keystrokes do not copy the full document, and Markdown parsing runs in a Web Worker. At 1,000,000 characters, MDWork disables word wrap and pauses live preview by default. Choose **Refresh preview** to parse the current revision manually. Save and PDF/DOCX export always read the current document snapshot.
 
-### 3.5 Import Word or PDF
+### 3.6 Import Word or PDF
 
-The import flow is **choose source file → choose a Markdown destination → convert and open a new tab**. Parsing is performed entirely on your computer. Files are not uploaded, and the original Word/PDF is never overwritten or modified. Canceling either file dialog produces no new document.
+Parsing is performed entirely on your computer. Files are not uploaded, and the original Word/PDF is never overwritten or modified. Word uses **choose source file → choose a Markdown destination → convert and open a new tab**. PDF shows a conversion preview before saving. Canceling a file dialog or the preview produces no new document.
 
 **Word:**
 
@@ -159,10 +171,15 @@ The import flow is **choose source file → choose a Markdown destination → co
 
 **PDF:**
 
-1. Choose **Import PDF** and select a `.pdf` that has a text layer.
-2. Choose the new Markdown destination. Text coordinates and font sizes are used to recognize common level 1–3 headings, bullets and numbered lists, join wrapped paragraphs and repair English hyphenation.
-3. PDF import focuses on text content rather than reproducing page layout. Review multi-column pages, complex tables, headers, footers and unusual reading order after conversion.
-4. A scanned or image-only PDF without a text layer produces an explicit OCR-first message, not empty or invented content. Remove password protection before importing an encrypted PDF.
+1. Choose **Import PDF**, select a `.pdf`, then choose one of three modes in the preview dialog:
+   - **Editable Markdown**: extracts the text layer, simple tables and decodable embedded images for further editing.
+   - **Preserve original layout**: renders every page as a high-resolution PNG. Visual layout is retained, but the text is not directly editable.
+   - **Hybrid**: retains extractable body text and appends a full-page original-layout image for pages with vector graphics, complex structures or no text. The current fallback is the whole page, not a crop of only the complex region.
+2. Review the original first page, Markdown preview, page count, character count, image count and formatting warnings, then choose the destination. Page snapshots and extracted images are saved in `assets` beside the new Markdown without overwriting existing files.
+3. Editable and hybrid modes use text coordinates and font sizes to recognize common level 1–3 headings, bullets, numbered lists, multi-column reading order and simple tables with clear alignment. They also join wrapped paragraphs and repair English hyphenation. Review complex tables, unusual reading order and original image placement; separately extracted images are appended after the text for their page.
+4. Repeated headers, footers and page numbers at page edges are removed by default. Clear the checkbox to retain them. Header/footer analysis runs after all pages are read, so hybrid mode decides whether body text remains only after that cleanup.
+5. OCR is not currently performed automatically. Editable mode reports an image-only PDF instead of generating empty or invented content. Use layout or hybrid mode to retain scanned page images. Remove password protection before importing an encrypted PDF.
+6. PDFs exported by MDWork contain a `mdwork-source.md` attachment. Editable or hybrid import restores the exact Markdown saved at export time instead of inferring layout; layout mode still creates page images. External images are not embedded in this attachment. Their relative paths resolve from the new Markdown directory, so copy the original `assets` when necessary.
 
 If the destination Markdown is already open in the editor, import stops and asks for another path to protect current edits. The resulting Markdown is an ordinary editable document and supports the normal save, preview and PDF-export features.
 
@@ -493,6 +510,8 @@ Both formats apply to the active group and read the current Monaco document snap
 5. MDWork waits for fonts, images and Mermaid resources, then creates a paginated PDF through Electron `printToPDF`.
 
 The PDF is not a screenshot: toolbars and split panes are excluded. Headings are kept from being stranded at page bottoms where possible, long tables repeat headers and code can wrap. Image wrapping, `::clear`, compact numbers, the TOC and link styling are carried into the PDF. Float pagination follows Chromium layout rules; review important print documents page by page.
+
+The desktop app also embeds the Markdown snapshot from export time as a `mdwork-source.md` attachment. Importing that PDF in MDWork's editable or hybrid mode restores the exact source instead of inferring formatting from page text. External images and other local resources are not bundled with this attachment; keep the corresponding `assets` and relative directory structure when moving or sharing the documents.
 
 ### 6.2 DOCX
 

@@ -65,7 +65,10 @@ export async function saveImportedDocument(
     `${path.basename(sourcePath, path.extname(sourcePath))}.md`,
   );
   const result = await dialog.showSaveDialog(window, {
+    title: '选择 Markdown 保存位置',
+    buttonLabel: '保存',
     defaultPath,
+    properties: ['createDirectory'],
     filters: [{ name: 'Markdown', extensions: ['md'] }],
   });
   if (result.canceled || !result.filePath) return { canceled: true };

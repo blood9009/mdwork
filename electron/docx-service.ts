@@ -25,7 +25,10 @@ export async function exportDocx(
     ? path.basename(request.sourcePath, path.extname(request.sourcePath))
     : request.title || '未命名';
   const save = await dialog.showSaveDialog(owner, {
+    title: '选择 Word 保存位置',
+    buttonLabel: '保存',
     defaultPath: `${baseName}.docx`,
+    properties: ['createDirectory'],
     filters: [{ name: 'Word 文档', extensions: ['docx'] }],
   });
   if (save.canceled || !save.filePath) return { canceled: true };

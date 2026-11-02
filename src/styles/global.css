@@ -140,7 +140,90 @@ button:disabled { opacity: .55; cursor: wait; }
 .format-color input { width: 20px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .format-toolbar-hint { flex: 0 0 auto; margin-left: auto; color: var(--muted); font-size: 11px; white-space: nowrap; }
 
-.workspace { flex: 1; min-height: 0; }
+.workspace-body { display: flex; flex: 1; min-height: 0; }
+.activity-bar {
+  display: flex;
+  flex: 0 0 42px;
+  flex-direction: column;
+  align-items: stretch;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+}
+.activity-button {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 44px;
+  padding: 0;
+  border-radius: 0;
+  color: var(--muted);
+}
+.activity-button.active { color: var(--accent); box-shadow: inset 2px 0 var(--accent); }
+.file-explorer {
+  display: flex;
+  flex: 0 0 238px;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+}
+.explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 36px;
+  padding: 0 7px 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.explorer-header > div { display: flex; }
+.explorer-icon-button { min-width: 26px; padding: 3px 5px; color: var(--muted); font-size: 17px; line-height: 1; }
+.explorer-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 13px; color: var(--muted); font-size: 12px; }
+.explorer-empty strong { color: var(--text); font-size: 13px; }
+.explorer-empty p { margin: 0; line-height: 1.65; }
+.explorer-empty .primary-button { width: 100%; }
+.explorer-root {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 30px;
+  min-width: 0;
+  padding: 0 9px;
+  border-block: 1px solid var(--border);
+  font-size: 12px;
+}
+.explorer-root strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer-tree { flex: 1; min-height: 0; overflow: auto; padding: 3px 0 8px; scrollbar-width: thin; }
+.explorer-entry {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 28px;
+  padding-top: 3px;
+  padding-right: 7px;
+  padding-bottom: 3px;
+  border-radius: 0;
+  color: var(--muted);
+  text-align: left;
+  font-size: 12px;
+}
+.explorer-entry.directory { color: var(--text); }
+.explorer-entry.active { color: var(--text); background: color-mix(in srgb, var(--accent) 15%, transparent); box-shadow: inset 2px 0 var(--accent); }
+.explorer-entry.opened:not(.active) { color: var(--text); }
+.explorer-entry-icon { flex: 0 0 15px; color: var(--muted); text-align: center; font-size: 11px; }
+.explorer-entry.file .explorer-entry-icon { color: var(--accent); font-family: var(--monaco-monospace-font); font-size: 10px; font-weight: 700; }
+.explorer-entry-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer-open-dot { flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.explorer-no-files { padding: 12px; color: var(--muted); font-size: 12px; }
+.explorer-footer { display: flex; justify-content: space-between; gap: 6px; flex: 0 0 25px; padding: 5px 10px; border-top: 1px solid var(--border); color: var(--muted); font-size: 10px; }
+.workspace { flex: 1; min-width: 0; min-height: 0; }
+@media (max-width: 1100px) {
+  .file-explorer { flex-basis: 200px; }
+  .activity-bar { flex-basis: 38px; }
+}
 .editor-grid { display: grid; gap: 2px; width: 100%; height: 100%; background: var(--border); }
 .editor-group { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid transparent; background: var(--panel); }
 .editor-group.active { border-color: color-mix(in srgb, var(--accent) 65%, transparent); }
@@ -281,6 +364,60 @@ button:disabled { opacity: .55; cursor: wait; }
   border-radius: 7px;
 }
 .resource-mode legend { padding: 0 5px; color: var(--muted); font-size: 12px; }
+
+.pdf-import-modal { width: min(1060px, 100%); }
+.pdf-source-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-import-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 0 0;
+  border: 0;
+}
+.pdf-import-modes legend { padding: 0; color: var(--muted); font-size: 12px; }
+.settings-form .pdf-import-modes label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--bg);
+  cursor: pointer;
+}
+.settings-form .pdf-import-modes label.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.pdf-import-modes label > span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.pdf-source-recovered { margin: 0; padding: 10px 12px; border-radius: 6px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); font-size: 12px; line-height: 1.6; }
+.pdf-import-preview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; min-height: 320px; }
+.pdf-import-preview section { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+.pdf-import-preview h3 { margin: 0; color: var(--muted); font-size: 12px; font-weight: 500; }
+.pdf-original-preview { display: grid; place-items: center; min-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); background: var(--bg); }
+.pdf-original-preview img { display: block; max-width: 100%; max-height: 430px; object-fit: contain; }
+.pdf-import-preview textarea {
+  width: 100%;
+  min-height: 320px;
+  max-height: 430px;
+  flex: 1;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--bg);
+  font: 12px/1.65 var(--mono);
+  white-space: pre;
+}
+.pdf-import-report { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 12px; }
+.pdf-import-warnings { margin: 0; padding: 12px 12px 12px 30px; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); background: var(--bg); font-size: 12px; line-height: 1.65; }
+
+@media (max-width: 760px) {
+  .pdf-import-modes, .pdf-import-preview { grid-template-columns: 1fr; }
+  .pdf-import-preview { min-height: 0; }
+}
 
 @media (max-width: 1000px) {
   .brand strong { display: none; }

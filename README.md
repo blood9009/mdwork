@@ -4,14 +4,14 @@ MDWork 是一款本地 Markdown 编写与预览软件，桌面版支持 macOS �
 
 ## 下载与文档
 
-> 下载链接指向 [GitHub Release 1.0.0.3](https://github.com/blood9009/mdwork/releases/tag/1.0.0.3) 中的实际构建产物；源码压缩包不包含二进制安装文件。
-> 发布标签与附件版本为 `1.0.0.3`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.3`。
+> 下载链接指向 [GitHub Release 1.0.0.4](https://github.com/blood9009/mdwork/releases/tag/1.0.0.4) 中的实际构建产物；源码压缩包不包含二进制安装文件。
+> 发布标签与附件版本为 `1.0.0.4`；应用和 VS Code 扩展内部使用符合 SemVer 的 `1.0.4`。
 
-- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-macos-universal.dmg)
-- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-macos-arm64.dmg)
-- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-1.0.0.3-win.zip)
-- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/MDWork-vscode-1.0.0.3.vsix)
-- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.3/SHA256SUMS.txt)
+- [macOS 通用版 DMG（Apple Silicon + Intel）](https://github.com/blood9009/mdwork/releases/download/1.0.0.4/MDWork-1.0.0.4-macos-universal.dmg)
+- [macOS Apple Silicon（arm64）DMG](https://github.com/blood9009/mdwork/releases/download/1.0.0.4/MDWork-1.0.0.4-macos-arm64.dmg)
+- [Windows x64 便携版 ZIP](https://github.com/blood9009/mdwork/releases/download/1.0.0.4/MDWork-1.0.0.4-win.zip)
+- [VS Code 扩展（VSIX）](https://github.com/blood9009/mdwork/releases/download/1.0.0.4/MDWork-vscode-1.0.0.4.vsix)
+- [发布文件 SHA-256 校验值](https://github.com/blood9009/mdwork/releases/download/1.0.0.4/SHA256SUMS.txt)
 - [中文详细语法与操作手册](docs/user-guide.zh-CN.md)
 - [English Syntax and User Guide](docs/user-guide.en-US.md)
 - [Mermaid 与图表详细教程](docs/mermaid-guide.zh-CN.md)
@@ -24,6 +24,7 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 - Monaco 编辑、Markdown 语法高亮、50:50 实时预览、25%–75% 分栏调整。
 - 分组格式工具条：段落/标题、字体、字号、粗体、斜体、下划线、删除线、颜色、列表、代码、表格和分割线，并提供常用格式快捷键。
 - 多文件标签、独立未保存状态，以及最多横向 4 栏、纵向 3 栏的 12 个编辑分栏。
+- VS Code 风格文件资源管理器：选择文件夹后递归列出 Markdown / 文本文件，支持目录折叠、多标签打开、活动文件高亮和手动刷新。
 - 可切换空格、Tab 标记，并以十六进制显示控制字符及其他不可见字符。
 - 大文件保留 Monaco 增量编辑，Markdown 解析移入 Web Worker；超过 1,000,000 字符默认暂停实时预览并可手动刷新。
 - 编辑 / 分栏 / 预览三种视图，编辑器到预览的源行滚动联动。
@@ -35,7 +36,7 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 - 可编辑 `layers` 分层架构图：层标题、网格条目、分组、层间箭头和分组连线，支持预览及 PDF 导出；DOCX 以文字内容回退。
 - 本地文件打开、保存、另存为、原子写入、未保存提醒和可选自动保存。
 - Word `.docx` 本地导入为 Markdown，保留可转换的标题、格式、列表、表格、链接和图片，图片提取到目标文档旁的 `assets`。
-- PDF 文字层本地导入为 Markdown，识别常见标题和列表并合并换行段落；扫描件需先 OCR。
+- PDF 三模式本地导入：可编辑 Markdown、整页版式图片或混合模式，支持多栏分析、重复页眉页脚清理、简单表格和图片提取。
 - 将一个或多个 Markdown / 文本文件拖入桌面窗口，分别作为标签打开。
 - 本地图片选择导入到文档旁 `assets`，重名不覆盖。
 - URL 图片嵌入或纯链接插入，HTTP/HTTPS/Mailto 外链跳转。
@@ -48,18 +49,20 @@ macOS 通用版同时包含 arm64 和 x86_64，可用于 Apple Silicon 与 Intel
 
 ## Word / PDF 导入
 
-点击工具栏“导入 Word”或“导入 PDF”，选择源文件，再选择新 Markdown 的保存位置。转换完全在本机进行，不上传文档，也不修改原 Word/PDF；保存成功后自动打开新标签。
+点击工具栏“导入 Word”或“导入 PDF”并选择源文件。Word 直接选择新 Markdown 的保存位置；PDF 先显示原页与转换结果预览，确认模式后再保存。转换完全在本机进行，不上传文档，也不修改原 Word/PDF；保存成功后自动打开新标签。
 
 - Word 支持 `.docx`，旧 `.doc` 请先在 Word/WPS 中另存为 `.docx`。可转换标题、段落、粗体、列表、表格、链接和图片；复杂排版、文本框及不支持的嵌入对象可能需要转换后整理。图片写入目标 Markdown 旁的 `assets`，重名文件不会被覆盖。
-- PDF 提取已有文字层，按字号和文本布局识别常见标题、列表并合并段落换行。多栏页面、复杂表格和扫描阅读的顺序可能需要转换后校对。
-- 扫描版 PDF 没有文字层时会提示先 OCR，不生成空白或伪造的 Markdown。受密码保护的 PDF 需先解除密码保护。
+- PDF“可编辑 Markdown”按文本坐标和字号提取正文，分析多栏阅读顺序，可移除跨页重复的页眉、页脚和页码，并转换具有明确对齐结构的简单表格及可解码的内嵌图片。
+- “保留原版式”把每页渲染为 PNG，文字不能直接编辑；“混合模式”保留可提取正文，对复杂或无文字页面附整页快照，不是复杂区域级裁切。
+- 导入前可核对首页、Markdown、页数、图片数和格式警告。当前不自动执行 OCR；可编辑模式遇到无文字层 PDF 会明确提示，扫描件可改用版式或混合模式保留页面图像。受密码保护的 PDF 需先解除密码保护。
+- MDWork 导出的 PDF 内嵌 `mdwork-source.md`，在可编辑或混合模式下导入可优先恢复原始源文；外部图片仍按源文相对路径解析，并未打包进 PDF。
 - 如果目标 Markdown 已在编辑器中打开，需另选保存路径，避免覆盖当前编辑内容。
 
 ## 格式工具与 PDF / DOCX 导出
 
 选中文字后使用两条格式工具条，可设置段落、标题、字体、字号、粗体、斜体、下划线、删除线、颜色、列表和代码，也可插入表格、分割线及 URL。macOS 使用 `Cmd+B/I/U`，Windows 使用 `Ctrl+B/I/U`；删除线为 `Cmd/Ctrl+Shift+X`。字体、字号和颜色以受限的行内 HTML 保存，并同步应用到预览、PDF 和 DOCX。
 
-“导出 PDF”生成固定分页文档；“导出 DOCX”生成可继续编辑的 Word 文档。两者都读取当前编辑器快照，不依赖预览是否刷新，也不会覆盖源 Markdown。DOCX 中 Mermaid 为静态 PNG；无法读取的图片保留替代文字并显示格式提示，分层架构图按文字内容导出。
+“导出 PDF”生成固定分页文档，并把导出时的 Markdown 源文作为 `mdwork-source.md` 附件嵌入，供 MDWork 后续精确恢复；外部图片资源不随附件打包。“导出 DOCX”生成可继续编辑的 Word 文档。两者都读取当前编辑器快照，不依赖预览是否刷新，也不会覆盖源 Markdown。DOCX 中 Mermaid 为静态 PNG；无法读取的图片保留替代文字并显示格式提示，分层架构图按文字内容导出。
 
 ## 图片环绕速览
 

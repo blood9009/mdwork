@@ -10,6 +10,22 @@ export interface SaveResult {
   path?: string;
 }
 
+export interface FolderEntry {
+  kind: 'directory' | 'file';
+  name: string;
+  path: string;
+  relativePath: string;
+  depth: number;
+}
+
+export interface FolderSnapshot {
+  canceled: boolean;
+  rootPath?: string;
+  rootName?: string;
+  entries: FolderEntry[];
+  truncated: boolean;
+}
+
 export interface ImageImportResult {
   canceled: boolean;
   src?: string;
@@ -17,6 +33,7 @@ export interface ImageImportResult {
 }
 
 export type DocumentImportKind = 'word' | 'pdf';
+export type PdfImportMode = 'editable' | 'layout' | 'hybrid';
 
 export interface ImportSourceResult {
   canceled: boolean;
@@ -70,6 +87,7 @@ export interface ExportHeading {
 export interface PdfExportRequest {
   title: string;
   sourcePath: string | null;
+  sourceMarkdown: string;
   bodyHtml: string;
   headings: ExportHeading[];
   options: PdfOptions;
@@ -100,7 +118,10 @@ export interface ExportImageResult {
 export interface MdWorkApi {
   openDocument(): Promise<DocumentResult>;
   openDroppedDocument(file: File): Promise<DocumentResult>;
-  saveDocument(path: string | null, content: string): Promise<SaveResult>;
+  openFolder(): Promise<FolderSnapshot>;
+  refreshFolder(): Promise<FolderSnapshot>;
+  openFolderDocument(filePath: string): Promise<DocumentResult>;
+  saveDocument(path: string | null, content: string, saveAs?: boolean): Promise<SaveResult>;
   importImage(documentPath: string): Promise<ImageImportResult>;
   selectImportSource(kind: DocumentImportKind): Promise<ImportSourceResult>;
   saveImportedDocument(request: SaveImportedDocumentRequest): Promise<ImportedDocumentResult>;

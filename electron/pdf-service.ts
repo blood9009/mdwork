@@ -3,6 +3,7 @@ import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { BrowserWindow, dialog } from 'electron';
+import { PDFDocument } from 'pdf-lib';
 import sanitizeHtml from 'sanitize-html';
 import type { PdfExportRequest, PdfExportResult, PdfOptions } from '../shared/contracts';
 import { atomicWriteFile } from './file-service';
@@ -230,7 +231,16 @@ export async function renderPdf(request: PdfExportRequest, outputPath: string): 
       headerTemplate: '<div></div>',
       footerTemplate: '<div style="width:100%;text-align:center;font-size:8px;color:#687078;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
     });
-    await atomicWriteFile(outputPath, pdf);
+    // Keep the visual PDF and its editable source together for lossless MDWork
+    // round-trips. External image assets remain referenced by the Markdown.
+    const document = await PDFDocument.load(pdf, { updateMetadata: false });
+    await document.attach(new TextEncoder().encode(request.sourceMarkdown), 'mdwork-source.md', {
+      mimeType: 'text/markdown',
+      description: 'MDWork embedded Markdown source',
+      creationDate: new Date(),
+      modificationDate: new Date(),
+    });
+    await atomicWriteFile(outputPath, Buffer.from(await document.save()));
   } finally {
     exporter?.destroy();
     await fs.rm(temporaryDirectory, { recursive: true, force: true }).catch(() => undefined);
@@ -245,7 +255,10 @@ export async function exportPdf(
     ? path.basename(request.sourcePath, path.extname(request.sourcePath))
     : request.title || '未命名';
   const save = await dialog.showSaveDialog(owner, {
+    title: '选择 PDF 保存位置',
+    buttonLabel: '保存',
     defaultPath: `${baseName}.pdf`,
+    properties: ['createDirectory'],
     filters: [{ name: 'PDF', extensions: ['pdf'] }],
   });
   if (save.canceled || !save.filePath) return { canceled: true };

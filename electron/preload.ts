@@ -12,7 +12,10 @@ const api: MdWorkApi = {
   openDroppedDocument: (file: File) => ipcRenderer.invoke(
     'document:open-dropped', webUtils.getPathForFile(file),
   ),
-  saveDocument: (path, content) => ipcRenderer.invoke('document:save', path, content),
+  openFolder: () => ipcRenderer.invoke('folder:open'),
+  refreshFolder: () => ipcRenderer.invoke('folder:refresh'),
+  openFolderDocument: (filePath) => ipcRenderer.invoke('folder:open-document', filePath),
+  saveDocument: (path, content, saveAs) => ipcRenderer.invoke('document:save', path, content, saveAs),
   importImage: (documentPath) => ipcRenderer.invoke('document:import-image', documentPath),
   selectImportSource: (kind) => ipcRenderer.invoke('document:select-import-source', kind),
   saveImportedDocument: (request: SaveImportedDocumentRequest) => ipcRenderer.invoke('document:save-imported', request),

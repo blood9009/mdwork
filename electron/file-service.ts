@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { constants, promises as fs } from 'node:fs';
 import path from 'node:path';
-import { BrowserWindow, dialog, shell } from 'electron';
+import { app, BrowserWindow, dialog, shell } from 'electron';
 import type { DocumentResult, ImageImportResult, SaveResult } from '../shared/contracts';
 
 const authorizedPaths = new Set<string>();
@@ -46,6 +46,18 @@ async function readDocument(selectedPath: string): Promise<DocumentResult> {
   return { canceled: false, path: filePath, content, size: stat.size };
 }
 
+export function isMarkdownDocumentPath(filePath: string): boolean {
+  return markdownExtensions.has(path.extname(filePath).toLowerCase());
+}
+
+export async function readMarkdownDocument(selectedPath: string): Promise<DocumentResult> {
+  const filePath = normalizePath(selectedPath);
+  if (!isMarkdownDocumentPath(filePath)) {
+    throw new Error('仅支持打开 Markdown 或文本文件（.md、.markdown、.mdown、.mkd、.txt）。');
+  }
+  return readDocument(filePath);
+}
+
 export async function openDocument(window: BrowserWindow): Promise<DocumentResult> {
   const result = await dialog.showOpenDialog(window, {
     properties: ['openFile'],
@@ -61,13 +73,7 @@ export async function openDocument(window: BrowserWindow): Promise<DocumentResul
 }
 
 export async function openDroppedDocument(filePath: string): Promise<DocumentResult> {
-  const normalized = normalizePath(filePath);
-  if (!markdownExtensions.has(path.extname(normalized).toLowerCase())) {
-    throw new Error('仅支持拖入 Markdown 或文本文件（.md、.markdown、.mdown、.mkd、.txt）。');
-  }
-  const stat = await fs.stat(normalized);
-  if (!stat.isFile()) throw new Error('拖入的项目不是文件。');
-  return readDocument(normalized);
+  return readMarkdownDocument(filePath);
 }
 
 export async function copyImageToAssets(
@@ -161,16 +167,20 @@ export async function saveDocument(
   window: BrowserWindow,
   currentPath: string | null,
   content: string,
+  saveAs = false,
 ): Promise<SaveResult> {
   let filePath = currentPath ? normalizePath(currentPath) : null;
 
   if (filePath && !authorizedPaths.has(filePath)) {
-    throw new Error('该文件路径尚未获得保存授权，请使用“另存为”。');
+    throw new Error('该文件路径尚未获得保存授权，请重新打开文件。');
   }
 
-  if (!filePath) {
+  if (!filePath || saveAs) {
     const result = await dialog.showSaveDialog(window, {
-      defaultPath: '未命名.md',
+      title: '选择 Markdown 保存位置',
+      buttonLabel: '保存',
+      defaultPath: filePath ?? path.join(app.getPath('home'), '未命名.md'),
+      properties: ['createDirectory'],
       filters: [{ name: 'Markdown', extensions: ['md'] }],
     });
     if (result.canceled || !result.filePath) return { canceled: true };
